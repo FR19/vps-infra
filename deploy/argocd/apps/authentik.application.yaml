@@ -74,6 +74,46 @@ spec:
   destination:
     server: https://kubernetes.default.svc
     namespace: auth
+  # Ignore diffs that often cause OutOfSync with Helm charts (image digests, metadata, status)
+  ignoreDifferences:
+    - group: ""
+      kind: Pod
+      jqPathExpressions:
+        - .metadata.resourceVersion
+        - .metadata.managedFields
+    - group: ""
+      kind: PersistentVolumeClaim
+      jqPathExpressions:
+        - .metadata.resourceVersion
+        - .metadata.managedFields
+        - .status
+    - group: apps
+      kind: Deployment
+      jqPathExpressions:
+        - .metadata.resourceVersion
+        - .metadata.generation
+        - .metadata.managedFields
+        - .spec.template.spec.containers[]?.image
+    - group: apps
+      kind: StatefulSet
+      jqPathExpressions:
+        - .metadata.resourceVersion
+        - .metadata.generation
+        - .metadata.creationTimestamp
+        - .metadata.managedFields
+        - .spec.template.spec.containers[]?.image
+    - group: ""
+      kind: Secret
+      jqPathExpressions:
+        - .metadata.resourceVersion
+        - .metadata.managedFields
+    - group: ""
+      kind: Service
+      jqPathExpressions:
+        - .metadata.resourceVersion
+        - .metadata.managedFields
+        - .spec.clusterIP
+        - .spec.clusterIPs
   syncPolicy:
     automated:
       prune: true
