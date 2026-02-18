@@ -15,10 +15,15 @@ spec:
       releaseName: authentik
       values: |
         # For infra-only bootstrap: deploy bundled DB/Redis via subcharts.
+        # Override image tags: chart defaults use old Bitnami tags no longer on Docker Hub.
         postgresql:
           enabled: true
+          image:
+            tag: "latest"
         redis:
           enabled: true
+          image:
+            tag: "latest"
 
         # Override chart default so deprecation check does not fire (we use server.ingress only)
         ingress: null
