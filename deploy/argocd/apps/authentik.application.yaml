@@ -95,17 +95,35 @@ spec:
         - .metadata.generation
         - .metadata.managedFields
         - .spec.template.spec.containers[]?.image
+    # StatefulSets: scope by name so ignore rules apply (authentik-postgresql, authentik-redis-master)
     - group: apps
       kind: StatefulSet
+      namespace: auth
+      name: authentik-postgresql
       jsonPointers:
         - /metadata/creationTimestamp
         - /metadata/resourceVersion
         - /metadata/generation
         - /metadata/managedFields
       jqPathExpressions:
+        - .metadata.creationTimestamp
         - .metadata.resourceVersion
         - .metadata.generation
+        - .metadata.managedFields
+        - .spec.template.spec.containers[]?.image
+    - group: apps
+      kind: StatefulSet
+      namespace: auth
+      name: authentik-redis-master
+      jsonPointers:
+        - /metadata/creationTimestamp
+        - /metadata/resourceVersion
+        - /metadata/generation
+        - /metadata/managedFields
+      jqPathExpressions:
         - .metadata.creationTimestamp
+        - .metadata.resourceVersion
+        - .metadata.generation
         - .metadata.managedFields
         - .spec.template.spec.containers[]?.image
     - group: ""
