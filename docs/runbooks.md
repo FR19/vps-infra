@@ -1,250 +1,283 @@
 # Runbooks
 
-This page contains operational runbooks for common tasks.
+Operational procedures for platform infrastructure. Use these when something fails or when performing maintenance.
 
-## Table of Contents
+## Table of contents
 
-- [Emergency Procedures](#emergency-procedures)
-- [Service Troubleshooting](#service-troubleshooting)
-- [Backup & Restore](#backup--restore)
-- [Security Incidents](#security-incidents)
-- [Maintenance Tasks](#maintenance-tasks)
+- [Emergency procedures](#emergency-procedures)
+- [Authentik](#authentik)
+- [Argo CD](#argocd)
+- [Backup & restore](#backup--restore)
+- [Security incidents](#security-incidents)
+- [Maintenance](#maintenance)
 
-## Emergency Procedures
+**Quick links:** [Fix Argo CD in place](deployment-infra.md#update-argocd-config-in-place) · [Teardown only Argo CD](deployment-infra.md#teardown-only-argocd) · [Full teardown](deployment-infra.md#teardown-full)
 
-### Service Down
+---
 
-**Symptoms**: Services not responding, 502/503 errors
+## Emergency procedures
+
+### Service down
+
+**Symptoms:** Services not responding, 502/503 errors.
 
 ```bash
-# 1. Check overall cluster health
 kubectl get nodes
 kubectl get pods --all-namespaces
-
-# 2. Check ingress
 kubectl get ingress --all-namespaces
-
-# 3. Check certificates
 kubectl get certificates --all-namespaces
-
-# 4. Check resource usage
 kubectl top nodes
 kubectl top pods --all-namespaces
-
-# Common fixes:
-# - Restart stuck pods: kubectl delete pod -n namespace pod-name
-# - Scale up: kubectl scale deployment -n namespace deployment-name --replicas=2
 ```
 
-### Authentication Failure
+**Actions:** Restart stuck pods (`kubectl delete pod -n <ns> <pod>`), scale deployments if needed, check Ingress and Certificate resources.
 
-**Symptoms**: Users cannot login, 401 errors
+### Authentication failure
+
+**Symptoms:** Users cannot log in, 401 errors.
 
 ```bash
-# 1. Check Authentik
 kubectl get pods -n auth
 kubectl logs -n auth deployment/authentik
-
-# 2. Check Authentik ingress
 kubectl get ingress -n auth
-curl https://auth.yourdomain.com
-
-# 3. Check JWKS endpoint
-curl https://auth.yourdomain.com/application/o/vps-platform/jwks/
-
-# 4. Verify OIDC provider configuration
-# Access Authentik UI and check:
-# - Provider exists
-# - Applications configured
-# - Client IDs match config
-
-# Common fixes:
-# - Restart Authentik: kubectl rollout restart -n auth deployment/authentik
-# - Verify DNS for auth.yourdomain.com
+curl -sI https://auth.<your-domain>
+curl -s https://auth.<your-domain>/application/o/vps-platform/jwks/
 ```
 
-### Database Issues (optional)
+**Actions:** Restart Authentik if needed (`kubectl rollout restart -n auth deployment/authentik`). In Authentik UI, verify provider, applications, and client IDs.
 
-This infra-only setup does **not** deploy an app Postgres yet. If/when you deploy a database later, add a database runbook here for your chosen setup (Postgres, managed DB, etc.).
+---
 
-## Service Troubleshooting
+## Authentik
 
-### Adding New Services
+### Unhealthy / startup probe failed / "Secret key missing"
+
+**Symptoms:** Authentik server pods fail startup; logs show "Secret key missing" or "no password supplied" (Postgres).
+
+**Cause:** Required one-time Secrets are missing: `authentik-secret-key` (cookie signing) and `authentik-postgresql` (DB password for the PostgreSQL subchart).
+
+**Resolution:**
 
 ```bash
-# Use the service template
-#
-# Run inside the services repo (this workspace: cd ../../services)
-cp -r templates/service-template-python services/your-new-service
-
-# Customize and deploy
-cd services/your-new-service
-# See the services repo templates README for detailed instructions
-
-# Create deployment
-cp templates/service-template-python/deployment-template.yaml deploy/your-new-service/deployment.yaml
-kubectl apply -f deploy/your-new-service/deployment.yaml
+./infra/scripts/create-auth-secret.sh
+./infra/scripts/create-auth-db-secret.sh
+kubectl rollout restart deployment -n auth -l app.kubernetes.io/name=authentik
 ```
 
-## Backup & Restore
+### PostgreSQL password authentication failed
 
-For infra-only, focus backups on:
+**Symptoms:** Authentik server or worker logs: "password authentication failed" or "no password supplied" when connecting to PostgreSQL.
+
+**Cause:** PostgreSQL was created before the `authentik-postgresql` Secret existed (or with a different password). The database was initialized with another password; Authentik is using the Secret, so they do not match.
+
+**Resolution:** Recreate PostgreSQL so it initializes with the Secret password. This **wipes Authentik's database** (acceptable for a fresh install).
+
+1. Ensure the Secret exists: `./infra/scripts/create-auth-db-secret.sh`
+2. Run: `./infra/scripts/recreate-auth-postgres.sh`
+
+The script scales down Postgres, deletes the PostgreSQL PVC, scales back up so the new pod initializes the DB with the Secret password, then restarts Authentik server/worker.
+
+### PostgreSQL/Redis pods not recreated after value change
+
+**Symptoms:** You changed values (e.g. `postgresql.image.tag`, `redis.image.tag`) and synced the Authentik app, but the Postgres/Redis pods were not recreated.
+
+**Cause:** Helm may not trigger a rollout when only a subchart image tag changes, or the sync did not update the in-cluster manifest.
+
+**Resolution:** Force a rollout:
+
+```bash
+kubectl rollout restart statefulset authentik-postgresql -n auth
+kubectl rollout restart statefulset authentik-redis-master -n auth
+# If names differ: kubectl get statefulset -n auth
+```
+
+### Cosmetic OutOfSync (StatefulSet creationTimestamp)
+
+**Symptoms:** The Authentik Application shows **OutOfSync** with a diff on StatefulSets `authentik-postgresql` and `authentik-redis-master` (e.g. `metadata.creationTimestamp`: `null` in desired vs timestamp in live).
+
+**Cause:** Helm templates emit `creationTimestamp: null`; the API server sets the real timestamp on create. Argo CD diff treats this as a difference.
+
+**Resolution:** Treat as **cosmetic**. The app is healthy. Do **not** sync to "fix" the diff; syncing can trigger unnecessary replaces. Leaving the Application OutOfSync for this reason is safe.
+
+---
+
+## Argo CD
+
+### 404 when accessing by domain
+
+**Symptoms:** `https://argocd.<domain>` returns 404. Port-forward works (e.g. `kubectl port-forward svc/argocd-server -n argocd 8080:80` then `http://localhost:8080`).
+
+**Diagnosis:**
+
+```bash
+kubectl get ingress -n argocd
+kubectl get ingress -n argocd -o yaml | grep -A5 "host:\|hostname:"
+kubectl get svc,endpoints -n argocd argocd-server
+kubectl get ingress -n argocd -o yaml | grep -A2 ingressClassName
+kubectl get ingressclass
+kubectl logs -n kube-system -l app.kubernetes.io/name=traefik --tail=50 | grep -i argocd
+nslookup argocd.<your-domain>
+curl -v https://argocd.<your-domain>
+```
+
+**Resolutions:**
+
+1. **No Ingress:** If `kubectl get ingress -n argocd` is empty, the Helm release did not create it. From repo root:
+   ```bash
+   helm dependency update infra/deploy/argocd/helm
+   helm upgrade --install argocd infra/deploy/argocd/helm -n argocd -f infra/deploy/argocd/helm/values.yaml
+   ```
+   Then confirm: `kubectl get ingress -n argocd` shows the correct host.
+
+2. **Ingress class:** Values must set `ingressClassName: traefik` so k3s Traefik uses this Ingress. If the cluster has no `traefik` IngressClass, list with `kubectl get ingressclass` and either create it or set `ingressClassName: ""` in the Ingress so Traefik uses the default.
+
+3. **Hostname mismatch:** Ensure the Ingress `host` matches the DNS name exactly (no typos).
+
+4. **No endpoints:** If `argocd-server` has no endpoints, the server pods are not ready. Check: `kubectl get pods -n argocd -l app.kubernetes.io/name=argocd-server`.
+
+5. **Traefik entrypoint:** Ingress uses `websecure` (HTTPS). Confirm Traefik has that entrypoint: `kubectl get configmap -n kube-system traefik -o yaml | grep -i entrypoint`. If only `web` exists, adjust the Ingress annotation or Traefik config.
+
+### 502 and TLS / backend / certificate issues
+
+**Symptoms:** 502 Bad Gateway, or site loads but browser shows "Not secure", or Traefik logs "secret argocd-server-tls does not exist".
+
+**Diagnosis:**
+
+```bash
+kubectl get certificate -n argocd
+kubectl describe certificate -n argocd
+kubectl get secret -n argocd argocd-server-tls
+kubectl get ingress -n argocd -o yaml | grep -A10 annotations
+kubectl get deployment argocd-server -n argocd -o yaml | grep -A5 "args:"
+```
+
+**Resolutions:**
+
+1. **TLS secret missing:** Certificate must be Ready before the secret exists. Check `kubectl get certificate,order,challenge -n argocd`. For HTTP-01, ensure the Argo CD hostname resolves to the VPS and port 80 is reachable. Check cert-manager logs: `kubectl logs -n cert-manager -l app=cert-manager`. Optional: `./infra/scripts/diagnose-argocd-tls.sh`.
+
+2. **Staging certificate (browser "Not secure"):** If the Certificate was issued by `letsencrypt-staging`, browsers will not trust it. Switch to production:
+   ```bash
+   kubectl delete certificate -n argocd argocd-server-tls
+   kubectl delete secret -n argocd argocd-server-tls
+   ```
+   Ensure the Ingress (or chart values) uses `cert-manager.io/cluster-issuer: letsencrypt-prod`. Re-sync the argocd Application or wait for cert-manager to re-issue. When the Certificate is Ready and the secret exists, reload in a private/incognito window to avoid cached cert state.
+
+3. **Certificate is prod and Ready but browser still "Not secure":** Confirm in the browser (DevTools → Security / padlock) that the certificate is from Let's Encrypt and the domain matches. If so, try a private window or another browser (often cached from staging). Confirm the Ingress uses `secretName: argocd-server-tls`.
+
+4. **502 with TLS / backend:** Ensure (a) Ingress has the `traefik.ingress.kubernetes.io/service.serversscheme: http` annotation, (b) Argo CD server deployment has `args: ["--insecure"]`. If `--insecure` is missing:
+   ```bash
+   kubectl patch deployment argocd-server -n argocd --type=json -p='[{"op": "add", "path": "/spec/template/spec/containers/0/args/-", "value": "--insecure"}]'
+   # If that fails (path exists): use "replace" or ensure args array exists first
+   kubectl rollout restart deployment argocd-server -n argocd
+   ```
+
+5. **Ingress backend port reverts to 443:** The **argocd** Application syncs the chart from Git. If Git has backend port 443 (no `configs.params.server.insecure`), each sync overwrites a local fix. **Fix:** Set `configs.params.server.insecure: "true"` in `deploy/argocd/helm/values.yaml` in the repo, push, then Hard Refresh and Sync the **argocd** app so the cluster state comes from Git.
+
+### HTTP → HTTPS redirect
+
+The Argo CD wrapper chart deploys a Traefik `Middleware` (redirect-https) and an `IngressRoute` that redirects HTTP to HTTPS for all hosts on port 80. New subdomains get the same behavior; no per-domain config is required.
+
+### RBAC – permission denied for app
+
+**Symptoms:** CLI returns `PermissionDenied` for apps in the `vps-platform` project (e.g. `argocd app get argocd`).
+
+**Cause:** RBAC default role or policy for the project is not set.
+
+**Resolution:** The Git-managed values in `deploy/argocd/helm/values.yaml` set `policy.default: role:admin` and a rule for `vps-platform/*`. After the **argocd** Application syncs, this applies. To fix immediately:
+
+```bash
+kubectl -n argocd patch configmap argocd-rbac-cm --type merge -p '{"data":{"policy.csv":"p, role:admin, applications, *, vps-platform/*, allow\n","policy.default":"role:admin"}}'
+kubectl -n argocd rollout restart deployment argocd-server
+```
+
+Then retry `argocd app get argocd` (or `argocd app sync argocd`).
+
+---
+
+## Backup & restore
+
+For infra-only, focus on:
+
 - Authentik configuration (exports, recovery codes)
-- Your Git repositories (infra/services/content)
+- Git repositories (infra and services/content)
 
-When you add an app database later, add a database backup/restore runbook here.
+When an app database is added, add a database backup/restore procedure here.
 
-### Backup Secrets
+**Export secrets (plaintext; store securely):**
 
 ```bash
-# Export all secrets
 kubectl get secrets --all-namespaces -o yaml > secrets-backup.yaml
-
-# Note: Store securely, secrets are in plaintext
 ```
 
-## Security Incidents
+---
 
-### Suspicious Activity
+## Security incidents
+
+### Suspicious activity
 
 ```bash
-# 1. Check logs for failed auth
 kubectl logs -n auth deployment/authentik | grep -i "failed"
-
-# 2. Check access logs
-# (example) kubectl logs -n myns deployment/myservice | grep -i POST
-
-# 3. Block IPs using firewall (in VPS)
-sudo ufw deny from SUSPICIOUS_IP to any
-
-# 4. Review Authentik logs in UI
-# - Check recent failed logins
-# - Review active sessions
+# Block IP on VPS: sudo ufw deny from SUSPICIOUS_IP to any
+# Review Authentik UI: failed logins, active sessions
 ```
 
-### Compromised Account
+### Compromised account
+
+1. Disable the account in Authentik UI.  
+2. Revoke all sessions for that user in Authentik UI.  
+3. Rotate secrets (e.g. `kubectl delete secret -n auth <secret>`, recreate with new values).  
+4. Restart affected services as needed.
+
+### Vulnerability in an image
 
 ```bash
-# 1. Disable account in Authentik UI
-# - Find user account
-# - Mark as inactive
-
-# 2. Revoke all sessions in Authentik UI
-# - User sessions tab
-# - Invalidate all sessions
-
-# 3. Rotate secrets
-kubectl delete secret -n auth authentik-secret
-# Create new secret with updated values
-
-# 4. Restart affected services
-# (example) kubectl rollout restart -n myns deployment/myservice
-```
-
-### Vulnerability Found
-
-```bash
-# 1. Identify affected services
 kubectl get pods --all-namespaces -o wide
-
-# 2. Check image versions
 kubectl get deployment --all-namespaces -o jsonpath='{range .items[*]}{.metadata.name}{"\t"}{.spec.template.spec.containers[*].image}{"\n"}{end}'
-
-# 3. Build updated images
-# Rebuild vulnerable components with patches
-
-# 4. Deploy updates
-# Use Argo CD or kubectl apply updated deployments
-
-# 5. Verify no vulnerable versions remain
-trivy image ghcr.io/org/service:latest
+# Rebuild and deploy patched images; verify with trivy or similar
 ```
 
-## Maintenance Tasks
+---
+
+## Maintenance
 
 ### Update k3s
 
 ```bash
-# On VPS, check current version
+# On VPS
 k3s --version
-
-# Update k3s
 curl -sfL https://get.k3s.io | sh -
-
-# Verify cluster health
 kubectl get nodes
 kubectl get pods --all-namespaces
 ```
 
-### Rotate Certificates
+### Rotate certificates
+
+Let's Encrypt certificates renew automatically via cert-manager. To force renewal, delete the Certificate resource; cert-manager will reissue:
 
 ```bash
-# Let's Encrypt certificates auto-renew via cert-manager
-# To force renewal:
-
-# Delete the relevant Certificate resource; it will be reissued automatically.
-# kubectl delete certificate -n <ns> <cert-name>
+kubectl delete certificate -n <namespace> <cert-name>
 ```
 
-### Clear Old Data
-
-Add data-cleanup procedures once you deploy app databases/services that accumulate data.
-
-### Update Content
-
-Content updates are pulled automatically by git-sync. To force update:
+### Check disk usage
 
 ```bash
-# Restart relevant service pods (example)
-# kubectl delete pod -n <ns> -l app=<service>
-```
-
-### Check Disk Usage
-
-```bash
-# VPS disk usage
 df -h
-
-# Kubernetes volumes
 kubectl get pvc --all-namespaces
-
-# Check individual services (examples)
-# kubectl exec -n <ns> deployment/<svc> -- df -h /content
 ```
 
-## Disaster Recovery
+### Adding new services
 
-### Corrupted etcd (k3s)
+Use the service template in the services repo and create the deployment; register a dedicated Argo CD Application if using GitOps for that service.
+
+### Disaster recovery
+
+**Corrupted etcd (k3s):**
 
 ```bash
-# If k3s etcd is corrupted:
-
-# 1. Stop k3s
 sudo systemctl stop k3s
-
-# 2. Delete state
 sudo rm -rf /var/lib/rancher/k3s/server/db
-
-# 3. Restart k3s
 sudo systemctl start k3s
-
-# 4. Re-apply all manifests
-# Re-run deployment process from Phase 3 onwards
+# Re-apply manifests from Phase 3 onwards
 ```
 
-### Full Cluster Recovery
-
-```bash
-# Restore from GitOps repo or Argo CD backup:
-
-# 1. Recover configuration
-cd deploy
-kubectl apply -f namespaces.yaml
-kubectl apply -f config.yaml
-
-# 2. Restore database
-# Use backup file
-
-# 3. Redeploy services
-# Argo CD will sync automatically
-```
+**Full cluster recovery:** Restore from Git (namespaces, Argo CD project and app-of-apps); restore databases from backup; Argo CD will sync applications from the repo.

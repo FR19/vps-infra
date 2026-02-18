@@ -14,12 +14,9 @@ spec:
     helm:
       releaseName: authentik
       values: |
-        # For infra-only bootstrap: deploy bundled DB/Redis via subcharts.
-        # Override image tags: chart defaults use old Bitnami tags no longer on Docker Hub.
         postgresql:
           enabled: true
           auth:
-            # One-time: create the Secret with ./infra/scripts/create-auth-db-secret.sh
             existingSecret: authentik-postgresql
             secretKeys:
               userPasswordKey: password
@@ -34,7 +31,6 @@ spec:
         # Override chart default so deprecation check does not fire (we use server.ingress only)
         ingress: null
 
-        # Secret key is required for Authentik to start. Create it once: ./infra/scripts/create-auth-secret.sh
         server:
           env:
             - name: AUTHENTIK_SECRET_KEY
@@ -74,9 +70,6 @@ spec:
   destination:
     server: https://kubernetes.default.svc
     namespace: auth
-  # Note: This app may show OutOfSync due to StatefulSet metadata (e.g. creationTimestamp: null in
-  # desired vs set-by-API in live). That is cosmetic; do not sync to "fix" it or you may recreate
-  # PVCs. See runbooks.md "Authentik: Cosmetic OutOfSync".
   syncPolicy:
     automated:
       prune: true

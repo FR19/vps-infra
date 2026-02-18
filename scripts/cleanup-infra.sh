@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Cleanup all infra (Argo CD, Authentik, cert-manager) so you can deploy from scratch.
 # Run from your local machine with KUBECONFIG set to your k3s cluster.
-# Usage: ./scripts/cleanup-infra.sh [--yes]
+# Usage: ./infra/scripts/cleanup-infra.sh [--yes]
 
 set -e
 

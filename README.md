@@ -15,7 +15,7 @@ This repo intentionally **does not** deploy application services (CV/blog/fronte
 ```
 infra/
 ├── vps-setup/                 # Run on VPS (disk + security + k3s)
-├── scripts/                   # Local helper scripts (cleanup-infra.sh, diagnose-argocd.sh)
+├── scripts/                   # Helper scripts (see below)
 ├── deploy/
 │   ├── namespaces.yaml         # Namespaces needed for infra components
 │   ├── cert-manager/           # ClusterIssuers (Let’s Encrypt)
@@ -68,7 +68,20 @@ Important:
 - `deploy/argocd/app-of-apps.yaml`: set `repoURL` (SSH URL recommended)
 - `deploy/argocd/project.yaml`: allow your infra repo URL in `sourceRepos`
 - `deploy/cert-manager/cluster-issuer-letsencrypt-*.yaml`: set `email:`
-- `deploy/argocd/apps/authentik.application.yaml`: set `auth.<your-domain>`
+- `deploy/argocd/apps/authentik/authentik.application.yaml`: set `auth.<your-domain>`
+
+## Scripts (`scripts/`)
+
+Run from the **repo root** (parent of `infra/`). Require `kubectl` (and `helm` where noted).
+
+| Script | Purpose |
+|--------|--------|
+| `./infra/scripts/cleanup-infra.sh` | Remove all infra (Argo CD, Authentik, cert-manager) for a clean re-deploy. Optional: `--yes` to skip confirmation. |
+| `./infra/scripts/create-auth-secret.sh` | One-time: create Authentik `secret_key` Secret in namespace `auth`. |
+| `./infra/scripts/create-auth-db-secret.sh` | One-time: create PostgreSQL password Secret for Authentik. Idempotent (skips if Secret exists). |
+| `./infra/scripts/recreate-auth-postgres.sh` | Wipe and recreate Authentik PostgreSQL (use when DB was created without the Secret). **Destructive:** deletes DB data. |
+| `./infra/scripts/helm-template-authentik.sh` | Render Authentik Helm chart locally (requires `helm`). Optional: pass a custom values file path. |
+| `./infra/scripts/diagnose-argocd-tls.sh` | Dump Argo CD + TLS state (Certificate, Ingress, cert-manager/Traefik logs) for debugging 502 or TLS issues. |
 
 ## Notes
 - Helm is used only to **bootstrap** Argo CD and cert-manager. After that, Argo CD becomes the reconciler and **YAML in this repo is the source of truth**.
