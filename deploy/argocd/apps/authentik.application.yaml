@@ -21,7 +21,9 @@ spec:
         redis:
           enabled: true
 
-        # Use server.ingress (top-level `ingress` is deprecated in this chart)
+        # Override chart default so deprecation check does not fire (we use server.ingress only)
+        ingress: null
+
         server:
           ingress:
             enabled: true

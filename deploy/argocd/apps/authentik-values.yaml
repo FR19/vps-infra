@@ -1,0 +1,24 @@
+# Values for Authentik Helm chart (mirrors Application helm.values).
+# Test locally: ./scripts/helm-template-authentik.sh
+
+postgresql:
+  enabled: true
+redis:
+  enabled: true
+
+# Override chart default so deprecation check does not fire (we use server.ingress only)
+ingress: null
+
+server:
+  ingress:
+    enabled: true
+    ingressClassName: traefik
+    annotations:
+      cert-manager.io/cluster-issuer: letsencrypt-prod
+    hosts:
+      - auth.tukangketik.net
+    pathType: Prefix
+    tls:
+      - secretName: authentik-tls
+        hosts:
+          - auth.tukangketik.net
