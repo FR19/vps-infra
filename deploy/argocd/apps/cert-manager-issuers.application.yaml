@@ -1,0 +1,26 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: cert-manager-issuers
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
+spec:
+  project: vps-platform
+  source:
+    # TODO: set to your infra repo git URL
+    repoURL: git@github.com:YOUR_ORG/vps-infra.git
+    targetRevision: main
+    path: deploy/cert-manager
+    directory:
+      recurse: false
+      include: "cluster-issuer-*.yaml"
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: cert-manager
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - ServerSideApply=true

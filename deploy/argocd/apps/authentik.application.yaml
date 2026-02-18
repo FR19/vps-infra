@@ -1,0 +1,48 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: authentik
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "2"
+spec:
+  project: vps-platform
+  source:
+    repoURL: https://charts.goauthentik.io
+    chart: authentik
+    targetRevision: 2024.8.1
+    helm:
+      releaseName: authentik
+      values: |
+        # For infra-only bootstrap: deploy bundled DB/Redis via subcharts.
+        # This avoids committing secrets (Authentik will generate required secrets if chart supports it).
+        postgresql:
+          enabled: true
+        redis:
+          enabled: true
+
+        ingress:
+          enabled: true
+          className: traefik
+          annotations:
+            cert-manager.io/cluster-issuer: letsencrypt-prod
+          hosts:
+            # TODO: set to your domain
+            - host: auth.example.com
+              paths:
+                - path: /
+                  pathType: Prefix
+          tls:
+            - secretName: authentik-tls
+              hosts:
+                - auth.example.com
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: auth
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
