@@ -322,6 +322,7 @@ argo-cd:
     params:
       annotations: {}
       create: true
+      server.insecure: "true"
     rbac:
       annotations: {}
       create: true
