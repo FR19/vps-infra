@@ -15,7 +15,6 @@ spec:
       releaseName: authentik
       values: |
         # For infra-only bootstrap: deploy bundled DB/Redis via subcharts.
-        # This avoids committing secrets (Authentik will generate required secrets if chart supports it).
         postgresql:
           enabled: true
         redis:
@@ -24,7 +23,14 @@ spec:
         # Override chart default so deprecation check does not fire (we use server.ingress only)
         ingress: null
 
+        # Secret key is required for Authentik to start. Create it once: ./infra/scripts/create-auth-secret.sh
         server:
+          env:
+            - name: AUTHENTIK_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: authentik-secret-key
+                  key: secret_key
           ingress:
             enabled: true
             ingressClassName: traefik
@@ -37,6 +43,13 @@ spec:
               - secretName: authentik-tls
                 hosts:
                   - auth.tukangketik.net
+        worker:
+          env:
+            - name: AUTHENTIK_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: authentik-secret-key
+                  key: secret_key
   destination:
     server: https://kubernetes.default.svc
     namespace: auth

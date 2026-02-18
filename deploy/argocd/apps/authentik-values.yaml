@@ -9,7 +9,14 @@ redis:
 # Override chart default so deprecation check does not fire (we use server.ingress only)
 ingress: null
 
+# Secret key: create with ./infra/scripts/create-auth-secret.sh
 server:
+  env:
+    - name: AUTHENTIK_SECRET_KEY
+      valueFrom:
+        secretKeyRef:
+          name: authentik-secret-key
+          key: secret_key
   ingress:
     enabled: true
     ingressClassName: traefik
@@ -22,3 +29,10 @@ server:
       - secretName: authentik-tls
         hosts:
           - auth.tukangketik.net
+worker:
+  env:
+    - name: AUTHENTIK_SECRET_KEY
+      valueFrom:
+        secretKeyRef:
+          name: authentik-secret-key
+          key: secret_key
