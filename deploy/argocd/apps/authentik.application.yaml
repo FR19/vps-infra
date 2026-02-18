@@ -74,74 +74,12 @@ spec:
   destination:
     server: https://kubernetes.default.svc
     namespace: auth
-  # Ignore diffs that often cause OutOfSync with Helm charts (image digests, metadata, status).
-  # After pushing: sync "infra-app-of-apps" so this Application spec is applied, then Hard Refresh authentik.
-  ignoreDifferences:
-    - group: ""
-      kind: Pod
-      jqPathExpressions:
-        - .metadata.resourceVersion
-        - .metadata.managedFields
-    - group: ""
-      kind: PersistentVolumeClaim
-      jqPathExpressions:
-        - .metadata.resourceVersion
-        - .metadata.managedFields
-        - .status
-    - group: apps
-      kind: Deployment
-      jqPathExpressions:
-        - .metadata.resourceVersion
-        - .metadata.generation
-        - .metadata.managedFields
-        - .spec.template.spec.containers[]?.image
-    # StatefulSets: scope by name so ignore rules apply (authentik-postgresql, authentik-redis-master)
-    - group: apps
-      kind: StatefulSet
-      namespace: auth
-      name: authentik-postgresql
-      jsonPointers:
-        - /metadata/creationTimestamp
-        - /metadata/resourceVersion
-        - /metadata/generation
-        - /metadata/managedFields
-      jqPathExpressions:
-        - .metadata.creationTimestamp
-        - .metadata.resourceVersion
-        - .metadata.generation
-        - .metadata.managedFields
-        - .spec.template.spec.containers[]?.image
-    - group: apps
-      kind: StatefulSet
-      namespace: auth
-      name: authentik-redis-master
-      jsonPointers:
-        - /metadata/creationTimestamp
-        - /metadata/resourceVersion
-        - /metadata/generation
-        - /metadata/managedFields
-      jqPathExpressions:
-        - .metadata.creationTimestamp
-        - .metadata.resourceVersion
-        - .metadata.generation
-        - .metadata.managedFields
-        - .spec.template.spec.containers[]?.image
-    - group: ""
-      kind: Secret
-      jqPathExpressions:
-        - .metadata.resourceVersion
-        - .metadata.managedFields
-    - group: ""
-      kind: Service
-      jqPathExpressions:
-        - .metadata.resourceVersion
-        - .metadata.managedFields
-        - .spec.clusterIP
-        - .spec.clusterIPs
+  # Note: This app may show OutOfSync due to StatefulSet metadata (e.g. creationTimestamp: null in
+  # desired vs set-by-API in live). That is cosmetic; do not sync to "fix" it or you may recreate
+  # PVCs. See runbooks.md "Authentik: Cosmetic OutOfSync".
   syncPolicy:
     automated:
       prune: true
       selfHeal: true
     syncOptions:
       - CreateNamespace=true
-      - ServerSideApply=true
