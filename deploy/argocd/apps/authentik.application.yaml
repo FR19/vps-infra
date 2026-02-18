@@ -74,7 +74,8 @@ spec:
   destination:
     server: https://kubernetes.default.svc
     namespace: auth
-  # Ignore diffs that often cause OutOfSync with Helm charts (image digests, metadata, status)
+  # Ignore diffs that often cause OutOfSync with Helm charts (image digests, metadata, status).
+  # After pushing: sync "infra-app-of-apps" so this Application spec is applied, then Hard Refresh authentik.
   ignoreDifferences:
     - group: ""
       kind: Pod
@@ -96,6 +97,11 @@ spec:
         - .spec.template.spec.containers[]?.image
     - group: apps
       kind: StatefulSet
+      jsonPointers:
+        - /metadata/creationTimestamp
+        - /metadata/resourceVersion
+        - /metadata/generation
+        - /metadata/managedFields
       jqPathExpressions:
         - .metadata.resourceVersion
         - .metadata.generation
