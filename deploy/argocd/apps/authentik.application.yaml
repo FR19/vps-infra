@@ -28,14 +28,14 @@ spec:
             cert-manager.io/cluster-issuer: letsencrypt-prod
           hosts:
             # TODO: set to your domain
-            - host: auth.example.com
+            - host: auth.tukangketik.net
               paths:
                 - path: /
                   pathType: Prefix
           tls:
             - secretName: authentik-tls
               hosts:
-                - auth.example.com
+                - auth.tukangketik.net
   destination:
     server: https://kubernetes.default.svc
     namespace: auth

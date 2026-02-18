@@ -6,11 +6,11 @@ spec:
   acme:
     server: https://acme-v02.api.letsencrypt.org/directory
     # TODO: set to your real email (used by Let's Encrypt)
-    email: you@example.com
+    email: fakhrur19.razi97@gmail.com
     privateKeySecretRef:
       name: letsencrypt-prod-account-key
     solvers:
-    - http01:
-        ingress:
-          class: traefik
-      selector: {}
+      - http01:
+          ingress:
+            class: traefik
+        selector: {}

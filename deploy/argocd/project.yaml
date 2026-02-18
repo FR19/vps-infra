@@ -6,18 +6,18 @@ metadata:
 spec:
   description: VPS Microservices Platform
   sourceRepos:
-  # TODO: set to your infra repo git URL
-  - git@github.com:YOUR_ORG/vps-infra.git
-  - https://charts.jetstack.io
-  - https://argoproj.github.io/argo-helm
-  - https://charts.goauthentik.io
-  - https://github.com/jetstack/cert-manager
-  - https://github.com/goauthentik/authentik
+    # TODO: set to your infra repo git URL
+    - git@github.com:FR19/vps-infra.git
+    - https://charts.jetstack.io
+    - https://argoproj.github.io/argo-helm
+    - https://charts.goauthentik.io
+    - https://github.com/jetstack/cert-manager
+    - https://github.com/goauthentik/authentik
   destinations:
-  - namespace: '*'
-    server: https://kubernetes.default.svc
+    - namespace: "*"
+      server: https://kubernetes.default.svc
   clusterResourceWhitelist:
-  - group: '*'
-    kind: '*'
+    - group: "*"
+      kind: "*"
   orphanedResources:
     warn: false
