@@ -1,0 +1,2 @@
+# Helm dependency packages (regenerate with: helm dependency update)
+deploy/argocd/helm/charts/

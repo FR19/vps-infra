@@ -325,8 +325,9 @@ argo-cd:
     rbac:
       annotations: {}
       create: true
-      policy.csv: ""
-      policy.default: ""
+      policy.csv: |
+        p, role:admin, applications, *, vps-platform/*, allow
+      policy.default: role:admin
       policy.matchMode: glob
       scopes: "[groups]"
     repositories: {}
@@ -1590,7 +1591,7 @@ argo-cd:
           create: true
           extraDomains: []
       hostname: argocd.tukangketik.net
-      ingressClassName: ""
+      ingressClassName: traefik
       labels: {}
       path: /
       pathType: Prefix

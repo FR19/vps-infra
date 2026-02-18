@@ -15,6 +15,7 @@ This repo intentionally **does not** deploy application services (CV/blog/fronte
 ```
 infra/
 ├── vps-setup/                 # Run on VPS (disk + security + k3s)
+├── scripts/                   # Local helper scripts (cleanup-infra.sh, diagnose-argocd.sh)
 ├── deploy/
 │   ├── namespaces.yaml         # Namespaces needed for infra components
 │   ├── cert-manager/           # ClusterIssuers (Let’s Encrypt)
@@ -57,6 +58,11 @@ kubectl apply -f deploy/argocd/repo-credentials.template.yaml
 Important:
 - The Secret `stringData.url` must match your `Application.spec.source.repoURL` exactly (SSH URL).
 - Do **not** commit a real private key to Git. Treat the template as a local edit or use a secrets solution (SOPS/SealedSecrets) later.
+
+## Helm chart (Argo CD)
+
+- **Commit:** `deploy/argocd/helm/Chart.yaml`, `deploy/argocd/helm/Chart.lock`, and `deploy/argocd/helm/values.yaml`. `Chart.lock` pins dependency versions so `helm dependency update` is reproducible.
+- **Do not commit:** `deploy/argocd/helm/charts/` (it is in `.gitignore`). That folder is created by `helm dependency update` and can be regenerated from `Chart.lock`.
 
 ## Important files to edit before first sync
 - `deploy/argocd/app-of-apps.yaml`: set `repoURL` (SSH URL recommended)
