@@ -18,6 +18,12 @@ spec:
         # Override image tags: chart defaults use old Bitnami tags no longer on Docker Hub.
         postgresql:
           enabled: true
+          auth:
+            # One-time: create the Secret with ./infra/scripts/create-auth-db-secret.sh
+            existingSecret: authentik-postgresql
+            secretKeys:
+              userPasswordKey: password
+              adminPasswordKey: postgres-password
           image:
             tag: "latest"
         redis:
@@ -36,6 +42,11 @@ spec:
                 secretKeyRef:
                   name: authentik-secret-key
                   key: secret_key
+            - name: AUTHENTIK_POSTGRESQL__PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: authentik-postgresql
+                  key: password
           ingress:
             enabled: true
             ingressClassName: traefik
@@ -55,6 +66,11 @@ spec:
                 secretKeyRef:
                   name: authentik-secret-key
                   key: secret_key
+            - name: AUTHENTIK_POSTGRESQL__PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: authentik-postgresql
+                  key: password
   destination:
     server: https://kubernetes.default.svc
     namespace: auth
