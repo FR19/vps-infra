@@ -1,4 +1,5 @@
-{{- if and .Values.argo-cd.server.ingress.enabled (eq .Values.argo-cd.server.ingress.controller "generic") }}
+{{- $argocd := index .Values "argo-cd" -}}
+{{- if and $argocd.server.ingress.enabled (eq $argocd.server.ingress.controller "generic") }}
 # Redirect all HTTP (port 80) to HTTPS for any host. More specific routes (e.g. ACME
 # /.well-known/acme-challenge/) take precedence. Uses a placeholder service; the
 # redirect middleware responds before the request reaches the backend.
