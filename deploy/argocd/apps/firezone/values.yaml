@@ -2,7 +2,15 @@
 # Chart from https://github.com/Intuinewin/helm-charts (firezone)
 # Requires: firezone-postgresql, firezone-secrets (run create-firezone-secrets.sh)
 
+nameOverride: ""
+fullnameOverride: ""
+clusterDomain: cluster.local
+
 global:
+  dockerRegistry: ghcr.io/firezone
+  runManualMigrations: true
+  otlp:
+    endpoint: ""
   logLevel: info
   externalWebURL: https://firezone.tukangketik.net
   externalApiURL: https://api.firezone.tukangketik.net
@@ -22,6 +30,13 @@ global:
       key: password
 
   erlangCluster:
+    epmdPort: 4369
+    distributionPort: 9000
+    enableKubernetesClusterModule: true
+    kubernetes:
+      selector:
+        key: erlangcluster
+        value: firezone
     cookie:
       secret: firezone-secrets
       key: RELEASE_COOKIE
@@ -72,6 +87,39 @@ global:
       enabled: true
 
 web:
+  replicaCount: 1
+  revisionHistoryLimit: 10
+  image:
+    repository: ghcr.io/firezone/portal
+    pullPolicy: IfNotPresent
+    tag: ""
+  releaseName: firezone
+  backgroundJobsEnabled: false
+  service:
+    type: ClusterIP
+    port: 8000
+    targetPort: 8000
+    portName: http
+  healthPort: 9001
+  livenessProbe:
+    initialDelaySeconds: 0
+    periodSeconds: 10
+    timeoutSeconds: 1
+    failureThreshold: 3
+    successThreshold: 1
+  readinessProbe:
+    initialDelaySeconds: 0
+    periodSeconds: 10
+    timeoutSeconds: 1
+    failureThreshold: 3
+    successThreshold: 1
+  serviceAccount:
+    create: true
+    automount: true
+  autoscaling:
+    enabled: false
+  pdb:
+    enabled: false
   ingress:
     enabled: true
     className: traefik
@@ -88,6 +136,39 @@ web:
           - firezone.tukangketik.net
 
 api:
+  replicaCount: 1
+  revisionHistoryLimit: 10
+  image:
+    repository: ghcr.io/firezone/portal
+    pullPolicy: IfNotPresent
+    tag: ""
+  releaseName: firezone
+  backgroundJobsEnabled: false
+  service:
+    type: ClusterIP
+    port: 8000
+    targetPort: 8000
+    portName: http
+  healthPort: 9001
+  livenessProbe:
+    initialDelaySeconds: 0
+    periodSeconds: 10
+    timeoutSeconds: 1
+    failureThreshold: 3
+    successThreshold: 1
+  readinessProbe:
+    initialDelaySeconds: 0
+    periodSeconds: 10
+    timeoutSeconds: 1
+    failureThreshold: 3
+    successThreshold: 1
+  serviceAccount:
+    create: true
+    automount: true
+  autoscaling:
+    enabled: false
+  pdb:
+    enabled: false
   ingress:
     enabled: true
     className: traefik
@@ -102,3 +183,33 @@ api:
       - secretName: firezone-api-tls
         hosts:
           - api.firezone.tukangketik.net
+
+domain:
+  replicaCount: 1
+  revisionHistoryLimit: 10
+  image:
+    repository: ghcr.io/firezone/portal
+    pullPolicy: IfNotPresent
+    tag: ""
+  releaseName: firezone
+  backgroundJobsEnabled: true
+  healthPort: 9001
+  livenessProbe:
+    initialDelaySeconds: 0
+    periodSeconds: 10
+    timeoutSeconds: 1
+    failureThreshold: 3
+    successThreshold: 1
+  readinessProbe:
+    initialDelaySeconds: 0
+    periodSeconds: 10
+    timeoutSeconds: 1
+    failureThreshold: 3
+    successThreshold: 1
+  serviceAccount:
+    create: true
+    automount: true
+  autoscaling:
+    enabled: false
+  pdb:
+    enabled: false
