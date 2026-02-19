@@ -17,6 +17,9 @@ spec:
     helm:
       releaseName: octelium-pg
       values: |
+        global:
+          security:
+            allowInsecureImages: true
         image:
           repository: bitnamilegacy/postgresql
           tag: 17.6.0-debian-12-r4
