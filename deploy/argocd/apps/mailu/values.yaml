@@ -56,9 +56,11 @@ mailu:
         smtps: false # 465 - implicit TLS (legacy)
         submission: true # 587 - STARTTLS (recommended)
 
+    # Use "mail" so the front listens on 80 for HTTP (Traefik) and enables TLS for mail (587 STARTTLS).
+    # With notls, port 587 is never started (it requires STARTTLS). mail uses /certs (mailu-certificates).
     extraEnvVars:
       - name: TLS_FLAVOR
-        value: notls
+        value: mail
 
   smtp:
     enabled: true
