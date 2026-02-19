@@ -51,6 +51,10 @@ mailu:
       enabled: true
       type: LoadBalancer
       externalTrafficPolicy: Local
+      # Use port 587 (submission/STARTTLS) for client auth; disable legacy 465 (SMTPS).
+      ports:
+        smtps: false # 465 - implicit TLS (legacy)
+        submission: true # 587 - STARTTLS (recommended)
 
     extraEnvVars:
       - name: TLS_FLAVOR
