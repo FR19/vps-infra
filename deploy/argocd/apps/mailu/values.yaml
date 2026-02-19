@@ -27,7 +27,7 @@ mailu:
     existingSecretPasswordKey: initial-account-password
     mode: create
 
-  subnet: 10.42.0.0/24
+  subnet: 10.42.1.0/24
 
   # cert-manager Certificate (templates/mailu-certificate.yaml) creates secret "mailu-certificates"
   # so the Mailu front pod can mount /certs. Override issuer if needed.
