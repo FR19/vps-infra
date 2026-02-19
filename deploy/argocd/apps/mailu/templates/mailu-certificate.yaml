@@ -1,0 +1,21 @@
+{{- if .Values.mailu }}
+# cert-manager Certificate so the secret "mailu-certificates" exists. The upstream Mailu chart's
+# front pod mounts this secret at /certs; without it the front pod stays in ContainerCreating.
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: mailu-certificates
+  namespace: {{ .Release.Namespace | quote }}
+  labels:
+    meta.helm.sh/release-namespace: {{ .Release.Namespace | quote }}
+    meta.helm.sh/release-name: {{ .Release.Name | quote }}
+spec:
+  secretName: mailu-certificates
+  issuerRef:
+    name: {{ .Values.mailu.certManager.issuer | default "letsencrypt-prod" }}
+    kind: ClusterIssuer
+  dnsNames:
+    {{- range .Values.mailu.hostnames }}
+    - {{ . | quote }}
+    {{- end }}
+{{- end }}

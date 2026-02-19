@@ -29,6 +29,11 @@ mailu:
 
   subnet: 10.42.0.0/24
 
+  # cert-manager Certificate (templates/mailu-certificate.yaml) creates secret "mailu-certificates"
+  # so the Mailu front pod can mount /certs. Override issuer if needed.
+  certManager:
+    issuer: letsencrypt-prod
+
   # Disabled: chart ingress uses backend port "https" (443), causing 502 when TLS_FLAVOR=notls.
   # Our templates/mailu-web-ingress.yaml uses port 80.
   ingress:
