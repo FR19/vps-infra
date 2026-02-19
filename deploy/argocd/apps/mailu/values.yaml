@@ -8,6 +8,14 @@ hostnames:
 ingress:
   enabled: false
 
+initialAccount:
+  enabled: true
+  username: admin
+  domain: tukangketik.net
+  existingSecret: mailu-initial-account
+  existingSecretPasswordKey: initial-account-password
+  mode: create
+
 mailu:
   domain: tukangketik.net
 
