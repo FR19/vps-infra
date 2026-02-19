@@ -8,14 +8,6 @@ hostnames:
 ingress:
   enabled: false
 
-initialAccount:
-  enabled: true
-  username: admin
-  domain: tukangketik.net
-  existingSecret: mailu-initial-account
-  existingSecretPasswordKey: initial-account-password
-  mode: create
-
 mailu:
   domain: tukangketik.net
 
@@ -24,6 +16,16 @@ mailu:
 
   secretKey: ""
   existingSecret: mailu-secret
+
+  # Initial admin: login at https://mail.tukangketik.net/admin as admin@tukangketik.net
+  # Create secret first: kubectl create secret generic mailu-initial-account -n mailu --from-literal=initial-account-password='YourPassword'
+  initialAccount:
+    enabled: true
+    username: admin
+    domain: tukangketik.net
+    existingSecret: mailu-initial-account
+    existingSecretPasswordKey: initial-account-password
+    mode: create
 
   subnet: 10.42.0.0/24
 
