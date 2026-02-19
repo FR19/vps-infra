@@ -3,8 +3,8 @@ name: argocd-wrapper
 description: Wrapper chart to install Argo CD from upstream with repo-managed values
 type: application
 version: 0.1.0
-appVersion: "2.13"
+appVersion: "3.3.1"
 dependencies:
   - name: argo-cd
-    version: "7.7.7"
+    version: "9.4.3"
     repository: https://argoproj.github.io/argo-helm
