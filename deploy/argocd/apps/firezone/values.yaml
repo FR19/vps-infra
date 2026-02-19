@@ -27,7 +27,7 @@ global:
       key: username
     password:
       secret: firezone-postgresql
-      key: password
+      key: postgres-password
 
   erlangCluster:
     epmdPort: 4369

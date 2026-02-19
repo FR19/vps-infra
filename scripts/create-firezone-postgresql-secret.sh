@@ -20,7 +20,7 @@ fi
 PASS="$(openssl rand -base64 32)"
 kubectl create secret generic "$SECRET_NAME" \
   --namespace "$NAMESPACE" \
-  --from-literal=username=firezone \
+  --from-literal=username=postgres \
   --from-literal=password="$PASS" \
   --from-literal=postgres-password="$PASS"
 

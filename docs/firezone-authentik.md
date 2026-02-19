@@ -209,6 +209,7 @@ To change the domain, edit `deploy/argocd/apps/firezone/values.yaml` (`global.ex
 - Ensure `firezone-postgresql` and `firezone-secrets` exist in namespace `firezone`
 - PostgreSQL requires `wal_level=logical`; see [Firezone README](https://github.com/Intuinewin/helm-charts/tree/main/firezone) for migration notes
 - **Invalid outbound_email_adapter**: Firezone uses SMTP with Mailu. If you see `Elixir.Swoosh.Adapters.Local` is invalid, the adapter was fixed to SMTP. Recreate the secret with SMTP opts: `kubectl delete secret -n firezone firezone-secrets`, then `FIREZONE_SMTP_PASSWORD='<password>' ./infra/scripts/create-firezone-secrets.sh`
+- **permission denied to create event trigger**: Firezone migrations need a superuser. Firezone connects as `postgres`. If you created the secret before this fix, patch it: `kubectl patch secret firezone-postgresql -n firezone -p '{"stringData":{"username":"postgres"}}'` and ensure values use `password.key: postgres-password`. Then restart Firezone pods.
 
 ### Users can't access resources
 
