@@ -1,0 +1,31 @@
+# Redis for Octelium cluster (secondary store / cache and pub-sub).
+# Create Secret octelium-redis in namespace octelium-storage with key "password" before sync.
+# bootstrap.yaml in this directory references this instance.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: octelium-redis
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
+spec:
+  project: vps-platform
+  source:
+    repoURL: https://charts.bitnami.com/bitnami
+    chart: redis
+    targetRevision: "20.x"
+    helm:
+      releaseName: octelium-redis
+      values: |
+        auth:
+          existingSecret: octelium-redis
+          existingSecretPasswordKey: password
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: octelium-storage
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

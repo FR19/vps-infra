@@ -7,7 +7,7 @@ Infrastructure repository for the VPS platform.
 - **cert-manager** + Let’s Encrypt issuers
 - **Argo CD** (GitOps controller)
 - **Authentik** (OIDC provider)
-- **Firezone** (self-hosted VPN at firezone.tukangketik.net, Authentik SSO) — see [`docs/firezone-authentik.md`](docs/firezone-authentik.md)
+- **Octelium** (self-hosted VPN client in-cluster; Octelium cluster installed separately) — see [`docs/octelium.md`](docs/octelium.md)
 
 This repo intentionally **does not** deploy application services (CV/blog/frontend). Those belong in a separate services repo and can be added later as separate Argo CD Applications.
 
@@ -80,9 +80,6 @@ Run from the **repo root** (parent of `infra/`). Require `kubectl` (and `helm` w
 | `./infra/scripts/cleanup-infra.sh` | Remove all infra (Argo CD, Authentik, cert-manager) for a clean re-deploy. Optional: `--yes` to skip confirmation. |
 | `./infra/scripts/create-auth-secret.sh` | One-time: create Authentik `secret_key` Secret in namespace `auth`. |
 | `./infra/scripts/create-auth-db-secret.sh` | One-time: create PostgreSQL password Secret for Authentik. Idempotent (skips if Secret exists). |
-| `./infra/scripts/create-firezone-postgresql-secret.sh` | One-time: create PostgreSQL Secret for Firezone. |
-| `./infra/scripts/create-firezone-secrets.sh` | One-time: create Phoenix/Erlang secrets for Firezone. |
-| `./infra/scripts/create-firezone-gateway-secret.sh` | One-time: create Firezone Gateway token Secret. Use `FIREZONE_TOKEN='<token>'` or prompt. |
 | `./infra/scripts/recreate-auth-postgres.sh` | Wipe and recreate Authentik PostgreSQL (use when DB was created without the Secret). **Destructive:** deletes DB data. |
 | `./infra/scripts/helm-template-authentik.sh` | Render Authentik Helm chart locally (requires `helm`). Optional: pass a custom values file path. |
 | `./infra/scripts/diagnose-argocd-tls.sh` | Dump Argo CD + TLS state (Certificate, Ingress, cert-manager/Traefik logs) for debugging 502 or TLS issues. |

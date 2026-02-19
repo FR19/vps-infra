@@ -8,10 +8,16 @@ metadata:
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: firezone
+  name: octelium
   labels:
-    # Gateway runs privileged for WireGuard /dev/net/tun
-    pod-security.kubernetes.io/enforce: privileged
+    pod-security.kubernetes.io/enforce: baseline
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: octelium-storage
+  labels:
+    pod-security.kubernetes.io/enforce: baseline
 ---
 apiVersion: v1
 kind: Namespace

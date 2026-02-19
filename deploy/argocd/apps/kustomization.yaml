@@ -6,7 +6,7 @@ resources:
   - cert-manager/cert-manager.application.yaml
   - cert-manager-issuers/cert-manager-issuers.application.yaml
   - authentik/authentik.application.yaml
-  - firezone-postgresql/firezone-postgresql.application.yaml
-  - firezone/firezone.application.yaml
-  - firezone-gateway/firezone-gateway.application.yaml
+  - octelium-cluster/octelium-postgresql.application.yaml
+  - octelium-cluster/octelium-redis.application.yaml
+  - octelium-client/octelium-client.application.yaml
   - mailu/mailu.application.yaml

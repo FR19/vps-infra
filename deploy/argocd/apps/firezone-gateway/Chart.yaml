@@ -1,7 +1,0 @@
-apiVersion: v2
-name: firezone-gateway
-version: 0.30.0
-appVersion: "1.5.0"
-type: application
-description: A Helm chart for deploying a firezone gateway
-# Sourced from https://github.com/Intuinewin/helm-charts/tree/main/firezone-gateway

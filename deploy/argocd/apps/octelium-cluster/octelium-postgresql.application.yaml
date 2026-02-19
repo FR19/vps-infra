@@ -1,0 +1,35 @@
+# PostgreSQL for Octelium cluster (primary store).
+# Create Secret octelium-pg in namespace octelium-storage with key "password" before sync.
+# bootstrap.yaml in this directory references this instance.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: octelium-postgresql
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
+spec:
+  project: vps-platform
+  source:
+    repoURL: https://charts.bitnami.com/bitnami
+    chart: postgresql
+    targetRevision: "16.x"
+    helm:
+      releaseName: octelium-pg
+      values: |
+        auth:
+          database: octelium
+          username: octelium
+          existingSecret: octelium-pg
+          secretKeys:
+            userPasswordKey: password
+            adminPasswordKey: postgres-password
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: octelium-storage
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

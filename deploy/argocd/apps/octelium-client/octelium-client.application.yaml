@@ -1,0 +1,31 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: octelium-client
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "2"
+spec:
+  project: vps-platform
+  source:
+    repoURL: oci://ghcr.io/octelium/helm-charts
+    chart: octelium
+    targetRevision: "0.1"  # pin or omit for latest; check https://github.com/octelium/octelium for releases
+    helm:
+      releaseName: octelium-client
+      values: |
+        # Override in Application or via values.yaml; see docs/octelium.md
+        octelium:
+          domain: "octelium.example.com"  # set to your Octelium cluster domain
+          authTokenSecret: "octelium-auth-token"  # Secret in namespace octelium with auth token
+          # serve: []  # optional: list of services to expose over VPN, e.g. ["argocd-server.argocd.svc.cluster.local"]
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: octelium
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true

@@ -1,0 +1,32 @@
+# Octelium cluster bootstrap config (source of truth in repo).
+# Used by: octops init <DOMAIN> --bootstrap deploy/argocd/apps/octelium-cluster/bootstrap.yaml
+#
+# Prerequisites:
+# 1. Deploy octelium-postgresql and octelium-redis Argo CD apps (same repo).
+# 2. Create Secrets in namespace octelium-storage:
+#    - octelium-pg with key "password" (and optionally "postgres-password" for admin)
+#    - octelium-redis with key "password"
+# See docs/octelium.md.
+---
+spec:
+  primaryStorage:
+    postgresql:
+      username: octelium
+      passwordFromSecret:
+        name: octelium-pg
+        namespace: octelium-storage
+        key: password
+      host: octelium-pg-postgresql.octelium-storage.svc
+      database: octelium
+      port: 5432
+      isTLS: false
+  secondaryStorage:
+    redis:
+      passwordFromSecret:
+        name: octelium-redis
+        namespace: octelium-storage
+        key: password
+      host: octelium-redis-master.octelium-storage.svc
+      port: 6379
+      database: 0
+      isTLS: false
