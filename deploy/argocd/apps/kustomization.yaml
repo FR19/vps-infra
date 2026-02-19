@@ -6,3 +6,4 @@ resources:
   - cert-manager/cert-manager.application.yaml
   - cert-manager-issuers/cert-manager-issuers.application.yaml
   - authentik/authentik.application.yaml
+  - mailu/mailu.application.yaml

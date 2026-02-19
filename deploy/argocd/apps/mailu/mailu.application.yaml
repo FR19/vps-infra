@@ -1,25 +1,21 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: argocd
+  name: mailu
   namespace: argocd
-  annotations:
-    argocd.argoproj.io/sync-wave: "0"
 spec:
-  project: vps-platform
+  project: default
   source:
     repoURL: git@github.com:FR19/vps-infra.git
     targetRevision: main
-    path: deploy/argocd/apps/argocd
+    path: deploy/argocd/apps/mailu
     helm:
-      releaseName: argocd
+      valueFiles:
+        - values.yaml
   destination:
     server: https://kubernetes.default.svc
-    namespace: argocd
+    namespace: mailu
   syncPolicy:
     automated:
       prune: true
       selfHeal: true
-    syncOptions:
-      - CreateNamespace=true
-      - ServerSideApply=true

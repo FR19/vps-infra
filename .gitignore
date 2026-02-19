@@ -1,2 +1,4 @@
 # Helm dependency packages (regenerate with: helm dependency update)
-deploy/argocd/helm/charts/
+deploy/argocd/apps/argocd/charts/
+deploy/argocd/apps/mailu/charts/
+deploy/argocd/repo-credentials.template.yaml

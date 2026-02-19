@@ -1,0 +1,9 @@
+apiVersion: v2
+name: mailu-app
+description: Mailu mail server with Traefik ingress (HTTP backend on port 80)
+type: application
+version: 0.1.0
+dependencies:
+  - name: mailu
+    repository: https://mailu.github.io/helm-charts
+    version: "2.6.3"

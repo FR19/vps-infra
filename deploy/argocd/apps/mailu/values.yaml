@@ -1,0 +1,51 @@
+# Wrapper chart values. Mailu subchart values are under "mailu:".
+# Top-level domain/hostnames are required so the Mailu chart sees .Values.domain when it validates (NOTES.txt).
+# Top-level ingress.enabled: false so the Mailu chart (when used as main or subchart) does not create its Ingress;
+# we use templates/mailu-web-ingress.yaml (port 80, Traefik + cert-manager) instead.
+domain: tukangketik.net
+hostnames:
+  - mail.tukangketik.net
+ingress:
+  enabled: false
+
+mailu:
+  domain: tukangketik.net
+
+  hostnames:
+    - mail.tukangketik.net
+
+  secretKey: ""
+  existingSecret: mailu-secret
+
+  subnet: 10.42.0.0/24
+
+  # Disabled: chart ingress uses backend port "https" (443), causing 502 when TLS_FLAVOR=notls.
+  # Our templates/mailu-web-ingress.yaml uses port 80.
+  ingress:
+    enabled: false
+
+  persistence:
+    enabled: true
+    size: 10Gi
+
+  front:
+    hostPort:
+      enabled: false
+
+    externalService:
+      enabled: true
+      type: LoadBalancer
+      externalTrafficPolicy: Local
+
+    extraEnvVars:
+      - name: TLS_FLAVOR
+        value: notls
+
+  smtp:
+    enabled: true
+
+  imap:
+    enabled: true
+
+  pop3:
+    enabled: false
