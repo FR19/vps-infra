@@ -1,0 +1,104 @@
+# Firezone - self-hosted at firezone.tukangketik.net
+# Chart from https://github.com/Intuinewin/helm-charts (firezone)
+# Requires: firezone-postgresql, firezone-secrets (run create-firezone-secrets.sh)
+
+global:
+  logLevel: info
+  externalWebURL: https://firezone.tukangketik.net
+  externalApiURL: https://api.firezone.tukangketik.net
+  externalApiWSURL: wss://api.firezone.tukangketik.net
+
+  database:
+    host: firezone-postgresql-postgresql
+    port: 5432
+    database: firezone
+    ssl: false
+    pool_size: 10
+    username:
+      secret: firezone-postgresql
+      key: username
+    password:
+      secret: firezone-postgresql
+      key: password
+
+  erlangCluster:
+    cookie:
+      secret: firezone-secrets
+      key: RELEASE_COOKIE
+
+  phoenix:
+    keyBase:
+      secret: firezone-secrets
+      key: SECRET_KEY_BASE
+    liveViewSalt:
+      secret: firezone-secrets
+      key: LIVE_VIEW_SIGNING_SALT
+    cookieSigningSalt:
+      secret: firezone-secrets
+      key: COOKIE_SIGNING_SALT
+    cookieEncryptionSalt:
+      secret: firezone-secrets
+      key: COOKIE_ENCRYPTION_SALT
+
+  tokens:
+    keyBase:
+      secret: firezone-secrets
+      key: TOKENS_KEY_BASE
+    salt:
+      secret: firezone-secrets
+      key: TOKENS_SALT
+
+  email:
+    adapter: Elixir.Swoosh.Adapters.Local
+    from: firezone@tukangketik.net
+    opts:
+      secret: firezone-secrets
+      key: OUTBOUND_EMAIL_ADAPTER_OPTS
+
+  signup:
+    enabled: true
+    whitelistedDomains: []
+
+  features:
+    idpSync:
+      enabled: true
+    multiSiteResources:
+      enabled: true
+    policyConditions:
+      enabled: true
+    restApi:
+      enabled: true
+    internetResource:
+      enabled: true
+
+web:
+  ingress:
+    enabled: true
+    className: traefik
+    annotations:
+      cert-manager.io/cluster-issuer: letsencrypt-prod
+    hosts:
+      - host: firezone.tukangketik.net
+        paths:
+          - path: /
+            pathType: Prefix
+    tls:
+      - secretName: firezone-web-tls
+        hosts:
+          - firezone.tukangketik.net
+
+api:
+  ingress:
+    enabled: true
+    className: traefik
+    annotations:
+      cert-manager.io/cluster-issuer: letsencrypt-prod
+    hosts:
+      - host: api.firezone.tukangketik.net
+        paths:
+          - path: /
+            pathType: Prefix
+    tls:
+      - secretName: firezone-api-tls
+        hosts:
+          - api.firezone.tukangketik.net

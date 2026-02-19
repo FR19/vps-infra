@@ -11,6 +11,7 @@ spec:
     - https://charts.jetstack.io
     - https://argoproj.github.io/argo-helm
     - https://charts.goauthentik.io
+    - https://charts.bitnami.com/bitnami
     - https://github.com/jetstack/cert-manager
     - https://github.com/goauthentik/authentik
   destinations:

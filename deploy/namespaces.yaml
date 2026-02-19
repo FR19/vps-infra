@@ -8,6 +8,14 @@ metadata:
 apiVersion: v1
 kind: Namespace
 metadata:
+  name: firezone
+  labels:
+    # Gateway runs privileged for WireGuard /dev/net/tun
+    pod-security.kubernetes.io/enforce: privileged
+---
+apiVersion: v1
+kind: Namespace
+metadata:
   name: cert-manager
   labels:
     pod-security.kubernetes.io/enforce: privileged

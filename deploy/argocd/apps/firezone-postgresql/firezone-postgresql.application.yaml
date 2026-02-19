@@ -1,0 +1,38 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: firezone-postgresql
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "2"
+spec:
+  project: vps-platform
+  source:
+    repoURL: https://charts.bitnami.com/bitnami
+    chart: postgresql
+    targetRevision: "15.3.5"
+    helm:
+      releaseName: firezone-postgresql
+      values: |
+        auth:
+          username: firezone
+          database: firezone
+          existingSecret: firezone-postgresql
+          secretKeys:
+            adminPasswordKey: postgres-password
+            userPasswordKey: password
+        primary:
+          persistence:
+            enabled: true
+            size: 8Gi
+          extendedConfiguration: |-
+            wal_level = logical
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: firezone
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

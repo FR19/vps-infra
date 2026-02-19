@@ -1,0 +1,109 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "firezone-gateway.fullname" . }}
+  labels:
+    {{- include "firezone-gateway.labels" . | nindent 4 }}
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicas }}
+  {{- end }}
+  revisionHistoryLimit: {{ .Values.revisionHistoryLimit }}
+  selector:
+    matchLabels:
+      {{- include "firezone-gateway.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "firezone-gateway.labels" . | nindent 8 }}
+        {{- with .Values.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "firezone-gateway.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          envFrom:
+            {{- toYaml .Values.envFrom | nindent 12 }}
+          env:
+            - name: FIREZONE_API_URL
+              value: {{ .Values.config.apiUrl }}
+            - name: FIREZONE_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: FIREZONE_ID
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.uid
+            - name: FIREZONE_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  {{- if .Values.config.token.existingSecret }}
+                  name: {{ .Values.config.token.existingSecret }}
+                  {{- else }}
+                  name: {{ include "firezone-gateway.fullname" . }}
+                  {{- end }}
+                  key: {{ .Values.config.token.key }}
+            - name: RUST_LOG
+              value: {{ .Values.logLevel }}
+            - name: HEALTH_CHECK_ADDR
+              value: 0.0.0.0:9000
+            - name: FIREZONE_NO_INC_BUF
+              value: {{ quote (not .Values.config.increaseKernelBuffers) }}
+            - name: FIREZONE_NO_TELEMETRY
+              value: {{ quote (not .Values.config.telemetry.enabled) }}
+            - name: FIREZONE_LOG_FORMAT
+              value: {{ .Values.logFormat }}
+            - name: FIREZONE_FLOW_LOGS
+              value: {{ quote .Values.config.flowLogs.enabled }}
+            {{- with .Values.extraEnv }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+          ports:
+            - name: health
+              containerPort: 9000
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: health
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: health
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- if .Values.dnsPolicy }}
+      dnsPolicy: {{ .Values.dnsPolicy }}
+      {{- end }}
+      {{- with .Values.dnsConfig }}
+      dnsConfig:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
