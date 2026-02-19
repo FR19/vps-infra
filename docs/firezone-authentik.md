@@ -30,6 +30,7 @@ Run these scripts **before** the first sync:
 ./infra/scripts/create-firezone-postgresql-secret.sh
 
 # Phoenix/Erlang secrets (SECRET_KEY_BASE, RELEASE_COOKIE, etc.)
+# For SMTP (Mailu): FIREZONE_SMTP_PASSWORD='<password>' ./infra/scripts/create-firezone-secrets.sh
 ./infra/scripts/create-firezone-secrets.sh
 
 # Gateway token (get from Firezone portal after first account creation; see step 1.5)
@@ -207,6 +208,7 @@ To change the domain, edit `deploy/argocd/apps/firezone/values.yaml` (`global.ex
 
 - Ensure `firezone-postgresql` and `firezone-secrets` exist in namespace `firezone`
 - PostgreSQL requires `wal_level=logical`; see [Firezone README](https://github.com/Intuinewin/helm-charts/tree/main/firezone) for migration notes
+- **Invalid outbound_email_adapter**: Firezone uses SMTP with Mailu. If you see `Elixir.Swoosh.Adapters.Local` is invalid, the adapter was fixed to SMTP. Recreate the secret with SMTP opts: `kubectl delete secret -n firezone firezone-secrets`, then `FIREZONE_SMTP_PASSWORD='<password>' ./infra/scripts/create-firezone-secrets.sh`
 
 ### Users can't access resources
 
@@ -221,7 +223,7 @@ To change the domain, edit `deploy/argocd/apps/firezone/values.yaml` (`global.ex
 | Script | Purpose |
 |--------|---------|
 | `create-firezone-postgresql-secret.sh` | PostgreSQL credentials for firezone-postgresql chart |
-| `create-firezone-secrets.sh` | Phoenix/Erlang secrets (SECRET_KEY_BASE, etc.) |
+| `create-firezone-secrets.sh` | Phoenix/Erlang secrets (SECRET_KEY_BASE, etc.). Set `FIREZONE_SMTP_PASSWORD` for Mailu SMTP. |
 | `create-firezone-gateway-secret.sh` | Gateway token (from Firezone portal) |
 
 ---

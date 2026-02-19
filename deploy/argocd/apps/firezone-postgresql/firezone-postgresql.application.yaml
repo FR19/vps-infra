@@ -14,6 +14,8 @@ spec:
     helm:
       releaseName: firezone-postgresql
       values: |
+        image:
+          tag: 17.6.0-debian-12-r4
         auth:
           username: firezone
           database: firezone
