@@ -64,7 +64,7 @@ global:
       key: TOKENS_SALT
 
   email:
-    adapter: Elixir.Swoosh.Adapters.Local
+    adapter: Elixir.Swoosh.Adapters.SMTP
     from: firezone@tukangketik.net
     opts:
       secret: firezone-secrets
