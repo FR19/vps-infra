@@ -13,7 +13,7 @@ spec:
   source:
     repoURL: https://charts.bitnami.com/bitnami
     chart: redis
-    targetRevision: "20.x"
+    targetRevision: "20.4.0"
     helm:
       releaseName: octelium-redis
       values: |
