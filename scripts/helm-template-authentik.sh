@@ -10,7 +10,7 @@ REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 cd "$REPO_ROOT"
 
 VALUES_FILE="${1:-infra/deploy/argocd/apps/authentik/authentik-values.yaml}"
-VERSION="2024.8.1"
+VERSION="2025.12.4"
 CHART_URL="https://github.com/goauthentik/helm/releases/download/authentik-${VERSION}/authentik-${VERSION}.tgz"
 
 helm template authentik "$CHART_URL" \
