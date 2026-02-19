@@ -17,7 +17,7 @@ global:
   externalApiWSURL: wss://api.firezone.tukangketik.net
 
   database:
-    host: firezone-postgresql-postgresql
+    host: firezone-postgresql
     port: 5432
     database: firezone
     ssl: false
