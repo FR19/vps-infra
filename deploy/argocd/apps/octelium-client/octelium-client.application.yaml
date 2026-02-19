@@ -8,9 +8,10 @@ metadata:
 spec:
   project: vps-platform
   source:
-    repoURL: oci://ghcr.io/octelium/helm-charts
-    chart: octelium
-    targetRevision: "0.1"  # pin or omit for latest; check https://github.com/octelium/octelium for releases
+    # Git repo avoids GHCR rate limits (no OCI credential needed). Alternative: oci://ghcr.io/octelium/helm-charts + targetRevision tag.
+    repoURL: https://github.com/octelium/helm-charts.git
+    path: charts/octelium
+    targetRevision: master  # or a commit SHA / tag from https://github.com/octelium/helm-charts
     helm:
       releaseName: octelium-client
       values: |

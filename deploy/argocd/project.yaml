@@ -12,7 +12,8 @@ spec:
     - https://argoproj.github.io/argo-helm
     - https://charts.goauthentik.io
     - https://charts.bitnami.com/bitnami
-    - oci://ghcr.io/octelium/helm-charts
+    - https://github.com/octelium/helm-charts.git
+    - oci://ghcr.io/octelium/helm-charts  # optional if you switch back to OCI
     - https://github.com/jetstack/cert-manager
     - https://github.com/goauthentik/authentik
   destinations:
