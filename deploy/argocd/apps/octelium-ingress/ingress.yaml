@@ -1,0 +1,29 @@
+# Ingress for Octelium cluster (front-proxy mode).
+# Backend: octelium-ingress-dataplane.octelium.svc:8080 (no TLS); Traefik terminates TLS.
+# Set the host below to your Octelium domain (same as used in octops init and octelium-client).
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: octelium-ingress
+  namespace: octelium
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    traefik.ingress.kubernetes.io/service.serversscheme: http
+spec:
+  ingressClassName: traefik
+  rules:
+    - host: octelium.tukangketik.net
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: octelium-ingress-dataplane
+                port:
+                  number: 8080
+  tls:
+    - secretName: octelium-ingress-tls
+      hosts:
+        - octelium.tukangketik.net
