@@ -1,7 +1,7 @@
 # Traefik IngressRoute for Octelium (front-proxy mode).
 # Backend: octelium-ingress-dataplane.octelium.svc:8080 (HTTP/2 cleartext); Traefik terminates TLS.
 # Edit the Host() match values to your Octelium domain (same as octops init).
-# The CLI uses octelium-api.<domain>:443 (gRPC), so both hosts must be routed.
+# The CLI uses octelium-api.<domain>:443 (gRPC). Portal redirect uses portal.<domain>. All must be routed.
 apiVersion: traefik.io/v1alpha1
 kind: IngressRoute
 metadata:
@@ -12,6 +12,12 @@ spec:
     - websecure
   routes:
     - match: Host(`octelium.tukangketik.net`)
+      kind: Rule
+      services:
+        - name: octelium-ingress-dataplane
+          port: 8080
+          scheme: h2c
+    - match: Host(`portal.octelium.tukangketik.net`)
       kind: Rule
       services:
         - name: octelium-ingress-dataplane

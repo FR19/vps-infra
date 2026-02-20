@@ -1,0 +1,21 @@
+# HUMAN User for octelium login (VPN client on your laptop).
+# Use this when the init token gives "Unauthenticated User" for octelium login.
+#
+# 1. Log in with init token (from VPS or machine with cluster access):
+#    export OCTELIUM_INSECURE_TLS=true
+#    octeliumctl login --domain octelium.tukangketik.net --auth-token $(kubectl get secret init-token -n octelium -o jsonpath='{.data.data}' | base64 -d)
+# 2. If that works, create this user and a credential:
+#    octeliumctl apply deploy/argocd/apps/octelium-cluster/human-user.example.yaml --domain octelium.tukangketik.net
+#    octeliumctl create cred --user admin --domain octelium.tukangketik.net admin-cli
+# 3. Use the printed token for octelium login (not the init token):
+#    octelium login --domain octelium.tukangketik.net --auth-token <TOKEN_FROM_CREATE_CRED>
+#
+# If octeliumctl login also fails with the init token, set up an IdP (Authentik/GitHub) and use:
+#    octelium login --domain octelium.tukangketik.net
+# (opens browser to log in)
+kind: User
+metadata:
+  name: admin
+spec:
+  type: HUMAN
+  email: president@tukangketik.net

@@ -1,6 +1,9 @@
 # Example: Authentik (OIDC) Identity Provider so the Octelium login page shows "Login with Authentik".
 # Uses your existing Authentik instance (e.g. auth.tukangketik.net) instead of GitHub.
 #
+# For full step-by-step instructions (Authentik UI, redirect URI, client secret, apply), see:
+#   docs/octelium-idp-authentik.md
+#
 # 1. In Authentik: Applications → Create with provider → OAuth2/OIDC.
 #    - Create an Application (e.g. name "Octelium").
 #    - On the OAuth2/OpenID Provider config, set Redirect URI to:

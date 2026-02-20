@@ -13,4 +13,5 @@ spec:
     kind: ClusterIssuer
   dnsNames:
     - octelium.tukangketik.net
+    - portal.octelium.tukangketik.net
     - octelium-api.octelium.tukangketik.net
