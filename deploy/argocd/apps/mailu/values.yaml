@@ -10,7 +10,7 @@ ingress:
 
 mailu:
   domain: tukangketik.net
-
+  revisionHistoryLimit: 2
   hostnames:
     - mail.tukangketik.net
 
