@@ -1,0 +1,41 @@
+# Example: Authentik (OIDC) Identity Provider so the Octelium login page shows "Login with Authentik".
+# Uses your existing Authentik instance (e.g. auth.tukangketik.net) instead of GitHub.
+#
+# 1. In Authentik: Applications → Create with provider → OAuth2/OIDC.
+#    - Create an Application (e.g. name "Octelium").
+#    - On the OAuth2/OpenID Provider config, set Redirect URI to:
+#      https://YOUR_OCTELIUM_DOMAIN/callback
+#      (e.g. https://octelium.tukangketik.net/callback)
+#    - Save. Note the provider slug (e.g. "octelium" in the URL: .../application/o/octelium/).
+#
+# 2. Issuer URL = Authentik base URL + /application/o/<SLUG>/
+#    e.g. https://auth.tukangketik.net/application/o/octelium/
+#    (Some OIDC clients need a trailing slash; try without if discovery fails.)
+#
+# 3. Get Client ID and Client Secret from the provider (Authentik shows them after creation).
+#
+# 4. Create the client secret in Octelium (paste the secret when prompted):
+#    If octeliumctl opens the browser and shows "No Available Identity Provider", log in first
+#    with the init token: octelium login --domain YOUR_DOMAIN --auth-token $(kubectl get secret init-token -n octelium -o jsonpath='{.data.data}' | base64 -d)
+#    Then: octeliumctl create secret authentik-oidc-secret --domain YOUR_OCTELIUM_DOMAIN
+#
+# 5. Replace below: issuerURL, clientID, and fromSecret if you used a different name.
+#
+# 6. Apply:
+#    octeliumctl apply deploy/argocd/apps/octelium-cluster/identity-provider-authentik.example.yaml --domain YOUR_OCTELIUM_DOMAIN
+#
+# See https://octelium.com/docs/octelium/latest/management/core/identity-providers (OpenID Connect)
+#
+kind: IdentityProvider
+metadata:
+  name: authentik
+spec:
+  displayName: Login with Authentik
+  oidc:
+    issuerURL: "https://auth.tukangketik.net/application/o/tukang-ketik/"
+    clientID: "eygH53Xg6lOz29tqJRgntMsf8xEwGnk4Eq2rkZfa"
+    clientSecret:
+      fromSecret: authentik-oidc-secret
+    # Optional: use email as identifier (default). Authentik usually provides email.
+    # identifierClaim: email
+    # checkEmailVerified: true

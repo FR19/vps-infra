@@ -461,7 +461,7 @@ argo-cd:
       timeoutSeconds: 1
     replicas: 1
     resources: {}
-    revisionHistoryLimit: 5
+    revisionHistoryLimit: 2
     roleRules: []
     runtimeClassName: ""
     serviceAccount:
@@ -648,7 +648,7 @@ argo-cd:
     podAnnotations: {}
     podLabels: {}
     priorityClassName: ""
-    revisionHistoryLimit: 3
+    revisionHistoryLimit: 2
     runtimeClassName: ""
     securityContext: {}
     statefulsetAnnotations: {}
@@ -1000,7 +1000,7 @@ argo-cd:
       podAnnotations: {}
       podLabels: {}
       priorityClassName: ""
-      revisionHistoryLimit: 3
+      revisionHistoryLimit: 2
       runtimeClassName: ""
       securityContext: {}
       statefulsetAnnotations: {}

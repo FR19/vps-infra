@@ -30,6 +30,23 @@ spec:
           secretKeys:
             userPasswordKey: password
             adminPasswordKey: postgres-password
+    kustomize:
+      patches:
+        - target:
+            kind: Deployment
+          patch: |
+            spec:
+              revisionHistoryLimit: 2
+        - target:
+            kind: StatefulSet
+          patch: |
+            spec:
+              revisionHistoryLimit: 2
+        - target:
+            kind: DaemonSet
+          patch: |
+            spec:
+              revisionHistoryLimit: 2
   destination:
     server: https://kubernetes.default.svc
     namespace: octelium-storage

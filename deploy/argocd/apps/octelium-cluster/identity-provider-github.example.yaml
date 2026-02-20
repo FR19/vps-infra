@@ -1,0 +1,23 @@
+# Example: GitHub OAuth Identity Provider so the Octelium login page shows "Login with GitHub".
+# Without any IdP, the portal shows "No Available Identity Providers".
+#
+# 1. Create a GitHub OAuth App: https://github.com/settings/developers
+#    - Authorization callback URL: https://YOUR_OCTELIUM_DOMAIN/callback
+#    - Homepage URL: https://YOUR_OCTELIUM_DOMAIN
+# 2. Create the client secret in Octelium (paste the secret when prompted):
+#    octeliumctl create secret github-client-secret --domain YOUR_OCTELIUM_DOMAIN
+# 3. Replace <YOUR_CLIENT_ID> below with the OAuth app Client ID.
+# 4. Apply:
+#    octeliumctl apply deploy/argocd/apps/octelium-cluster/identity-provider-github.example.yaml --domain YOUR_OCTELIUM_DOMAIN
+#
+# See https://octelium.com/docs/octelium/latest/management/core/identity-providers
+#
+kind: IdentityProvider
+metadata:
+  name: github
+spec:
+  displayName: Login with GitHub
+  github:
+    clientID: "eygH53Xg6lOz29tqJRgntMsf8xEwGnk4Eq2rkZfa"
+    clientSecret:
+      fromSecret: github-client-secret

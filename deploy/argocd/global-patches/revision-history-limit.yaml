@@ -1,0 +1,23 @@
+# Global patch definition: revisionHistoryLimit: 2 for all workloads.
+# Each Helm-based Application in deploy/argocd/apps/* includes these patches
+# via spec.source.kustomize.patches so they apply after Helm render.
+#
+# Patch content (inline in each Application):
+#
+#   kustomize:
+#     patches:
+#       - target:
+#           kind: Deployment
+#         patch: |
+#           spec:
+#             revisionHistoryLimit: 2
+#       - target:
+#           kind: StatefulSet
+#         patch: |
+#           spec:
+#             revisionHistoryLimit: 2
+#       - target:
+#           kind: DaemonSet
+#         patch: |
+#           spec:
+#             revisionHistoryLimit: 2

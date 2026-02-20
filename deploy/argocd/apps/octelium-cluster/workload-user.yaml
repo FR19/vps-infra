@@ -1,0 +1,9 @@
+# WORKLOAD User for the Octelium client (Kubernetes Helm chart).
+# Apply with: octeliumctl apply deploy/argocd/apps/octelium-cluster/workload-user.yaml --domain YOUR_OCTELIUM_DOMAIN
+# Then create a credential: octeliumctl create cred --user k8s-client --domain YOUR_DOMAIN my-cred
+# See docs/octelium.md Part 4.
+kind: User
+metadata:
+  name: k8s-client
+spec:
+  type: WORKLOAD

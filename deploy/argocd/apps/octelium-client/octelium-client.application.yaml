@@ -20,6 +20,23 @@ spec:
           domain: "octelium.example.com"  # set to your Octelium cluster domain
           authTokenSecret: "octelium-auth-token"  # Secret in namespace octelium with auth token
           # serve: []  # optional: list of services to expose over VPN, e.g. ["argocd-server.argocd.svc.cluster.local"]
+    kustomize:
+      patches:
+        - target:
+            kind: Deployment
+          patch: |
+            spec:
+              revisionHistoryLimit: 2
+        - target:
+            kind: StatefulSet
+          patch: |
+            spec:
+              revisionHistoryLimit: 2
+        - target:
+            kind: DaemonSet
+          patch: |
+            spec:
+              revisionHistoryLimit: 2
   destination:
     server: https://kubernetes.default.svc
     namespace: octelium
