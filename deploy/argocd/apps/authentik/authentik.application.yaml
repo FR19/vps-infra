@@ -14,7 +14,8 @@ spec:
     helm:
       releaseName: authentik
       values: |
-        revisionHistoryLimit: 2
+        global:
+          revisionHistoryLimit: 2
         postgresql:
           enabled: true
           auth:
