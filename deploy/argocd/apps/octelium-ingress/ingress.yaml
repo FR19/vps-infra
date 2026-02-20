@@ -1,6 +1,7 @@
 # Ingress for Octelium cluster (front-proxy mode).
 # Backend: octelium-ingress-dataplane.octelium.svc:8080 (no TLS); Traefik terminates TLS.
-# Set the host below to your Octelium domain (same as in certificate.yaml and octops init).
+# Set the hosts below to your Octelium domain (same as in certificate.yaml and octops init).
+# The CLI connects to octelium-api.<domain>:443 (gRPC), so both <domain> and octelium-api.<domain> must be routed.
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
@@ -24,7 +25,19 @@ spec:
                 name: octelium-ingress-dataplane
                 port:
                   number: 8080
+    # CLI (octelium login) uses octelium-api.<domain>; without this host, gRPC gets 404.
+    - host: octelium-api.octelium.tukangketik.net
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: octelium-ingress-dataplane
+                port:
+                  number: 8080
   tls:
     - secretName: octelium-ingress-tls
       hosts:
         - octelium.tukangketik.net
+        - octelium-api.octelium.tukangketik.net
