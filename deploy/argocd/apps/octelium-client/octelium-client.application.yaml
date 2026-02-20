@@ -11,14 +11,14 @@ spec:
     # Git repo avoids GHCR rate limits (no OCI credential needed). Alternative: oci://ghcr.io/octelium/helm-charts + targetRevision tag.
     repoURL: https://github.com/octelium/helm-charts.git
     path: charts/octelium
-    targetRevision: master  # or a commit SHA / tag from https://github.com/octelium/helm-charts
+    targetRevision: master # or a commit SHA / tag from https://github.com/octelium/helm-charts
     helm:
       releaseName: octelium-client
       values: |
         # Override in Application or via values.yaml; see docs/octelium.md
         revisionHistoryLimit: 2
         octelium:
-          domain: "octelium.example.com"  # set to your Octelium cluster domain
+          domain: "octelium.tukangketik.net"  # set to your Octelium cluster domain
           authTokenSecret: "octelium-auth-token"  # Secret in namespace octelium with auth token
           # serve: []  # optional: list of services to expose over VPN, e.g. ["argocd-server.argocd.svc.cluster.local"]
   destination:
