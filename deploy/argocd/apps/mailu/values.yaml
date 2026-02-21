@@ -51,14 +51,10 @@ mailu:
     forwardAuthUrl: "http://authentik-server.auth.svc.cluster.local/outpost.goauthentik.io/auth/traefik"
     # External URL (use if in-cluster fails or you need auth via public host):
     # forwardAuthUrl: "https://auth.tukangketik.net/outpost.goauthentik.io/auth/traefik"
-    # Backend for /outpost.goauthentik.io/* on the mail host (callback).
+    # Backend for /outpost.goauthentik.io/* on the mail host (callback). Requires Traefik allowCrossNamespace=true.
     backendNamespace: auth
     backendServiceName: authentik-server
     backendPort: 80
-    # Callback (/outpost.goauthentik.io/*) must reach Authentik or you get infinite redirect after login.
-    # true = direct ref to auth/authentik-server (requires Traefik allowCrossNamespace=true).
-    # false = use ExternalName service (Traefik often doesn't route to it; can cause redirect loop).
-    useCrossNamespaceService: true
     # CIDRs to trust for proxy auth. Must include the IPs Traefik uses when calling Mailu (pod or node CIDR).
     # See docs/mailu-install.md or docs/authentik-mailu-setup.md for how to find your cluster's range.
     proxyAuthWhitelist: "10.42.1.0/24"

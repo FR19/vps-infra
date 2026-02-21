@@ -17,20 +17,15 @@ spec:
   routes:
     {{- if and .Values.mailu.authentik .Values.mailu.authentik.enabled }}
     # Higher priority: Authentik outpost callback (must be served by Authentik, not Mailu).
-    # Uses local service mailu-authentik-outpost (ExternalName) to avoid cross-namespace ref when Traefik has allowCrossNamespace=false.
+    # Requires Traefik allowCrossNamespace=true (see deploy/traefik/README.md).
     {{- range .Values.mailu.hostnames }}
     - match: Host(`{{ . }}`) && PathPrefix(`/outpost.goauthentik.io/`)
       kind: Rule
       priority: 20
       services:
-        {{- if $.Values.mailu.authentik.useCrossNamespaceService }}
         - name: {{ $.Values.mailu.authentik.backendServiceName }}
           namespace: {{ $.Values.mailu.authentik.backendNamespace }}
           port: {{ $.Values.mailu.authentik.backendPort | default 80 }}
-        {{- else }}
-        - name: mailu-authentik-outpost
-          port: {{ $.Values.mailu.authentik.backendPort | default 80 }}
-        {{- end }}
     {{- end }}
     # Main route: Mailu with ForwardAuth (headers first so Authentik gets X-Forwarded-Host for provider match)
     {{- range .Values.mailu.hostnames }}
