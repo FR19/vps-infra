@@ -53,8 +53,8 @@ mailu:
     forwardAuthUrl: "https://auth.tukangketik.net/outpost.goauthentik.io/auth/traefik"
     # Backend for /outpost.goauthentik.io/* on the mail host (callback). Requires Traefik allowCrossNamespace=true.
     backendNamespace: auth
-    backendServiceName: authentik-server
-    backendPort: 80
+    backendServiceName: ak-outpost-authentik-embedded-outpost
+    backendPort: 9000
     # CIDRs to trust for proxy auth. Must include the IPs Traefik uses when calling Mailu (pod or node CIDR).
     # See docs/mailu-install.md or docs/authentik-mailu-setup.md for how to find your cluster's range.
     proxyAuthWhitelist: "10.42.1.0/24"
