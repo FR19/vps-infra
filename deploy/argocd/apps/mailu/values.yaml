@@ -45,13 +45,14 @@ mailu:
 
   # Authentik: forward auth + proxy auth headers. When enabled, Traefik IngressRoute
   # uses ForwardAuth to Authentik and Mailu trusts PROXY_AUTH_HEADER from Traefik.
+  # Use the outpost service (not authentik-server) for both forwardAuthUrl and callback backend so auth and cookies work correctly.
   authentik:
     enabled: true
-    # URL Traefik calls for forward auth. In-cluster avoids Host being overwritten (fixes 404).
+    # URL Traefik calls for forward auth. Point at the outpost service (K8s integration creates e.g. ak-outpost-authentik-embedded-outpost).
     forwardAuthUrl: "http://ak-outpost-authentik-embedded-outpost.auth.svc.cluster.local:9000/outpost.goauthentik.io/auth/traefik"
     # External URL (use if in-cluster fails or you need auth via public host):
     # forwardAuthUrl: "https://auth.tukangketik.net/outpost.goauthentik.io/auth/traefik"
-    # Backend for /outpost.goauthentik.io/* on the mail host (callback). Requires Traefik allowCrossNamespace=true.
+    # Backend for /outpost.goauthentik.io/* on the mail host (callback). Use the same outpost service. Requires Traefik allowCrossNamespace=true.
     backendNamespace: auth
     backendServiceName: ak-outpost-authentik-embedded-outpost
     backendPort: 9000

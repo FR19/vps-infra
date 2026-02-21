@@ -206,6 +206,20 @@ argo-cd:
   configs:
     clusterCredentials: {}
     cm:
+      # Public URL for Argo CD (must match Authentik redirect URI).
+      url: https://argocd.tukangketik.net
+      # Native OIDC via Authentik; see docs/authentik-argocd-sso.md.
+      # Replace issuer and clientID with values from your Authentik OAuth2 provider.
+      oidc.config: |
+        name: Authentik
+        issuer: https://auth.tukangketik.net/application/o/argocd/
+        clientID: xIVb60lacAutTsr6N6ehZd1usUDOgm7dcmTcMZWG
+        clientSecret: $oidc.argocd.clientSecret
+        requestedScopes:
+          - openid
+          - profile
+          - email
+          - groups
       admin.enabled: true
       annotations: {}
       application.instanceLabelKey: argocd.argoproj.io/instance
@@ -328,13 +342,20 @@ argo-cd:
       create: true
       policy.csv: |
         p, role:admin, applications, *, vps-platform/*, allow
-      policy.default: role:admin
+        p, role:readonly, applications, get, vps-platform/*, allow
+        p, role:readonly, applications, list, vps-platform/*, allow
+        g, argocd-admins, role:admin
+        g, argocd-viewers, role:readonly
+      policy.default: role:readonly
       policy.matchMode: glob
       scopes: "[groups]"
     repositories: {}
     repositoriesAnnotations: {}
     secret:
       annotations: {}
+      # OIDC client secret from Authentik; set via values override or secret manager (see docs/authentik-argocd-sso.md).
+      extra:
+        "oidc.argocd.clientSecret": ""
       argocdServerAdminPassword: ""
       argocdServerAdminPasswordMtime: ""
       azureDevops:
