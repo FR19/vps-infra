@@ -64,7 +64,7 @@ configMaps:
       policy: |
         {
           "groups": {
-            "group:admins": ["fakhrur"]
+            "group:admins": ["president"]
           },
           "tagOwners": {
             "tag:vps": ["group:admins"]

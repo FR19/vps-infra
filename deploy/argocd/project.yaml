@@ -8,6 +8,7 @@ spec:
   sourceRepos:
     # TODO: set to your infra repo git URL
     - git@github.com:FR19/vps-infra.git
+    - https://charts.gabe565.com
     - https://charts.jetstack.io
     - https://argoproj.github.io/argo-helm
     - https://charts.goauthentik.io

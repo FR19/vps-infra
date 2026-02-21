@@ -13,7 +13,7 @@ spec:
         releaseName: headscale
         valueFiles:
           - $values/deploy/argocd/apps/headscale/values.yaml
-    - repoURL: https://github.com/FR19/vps-infra.git
+    - repoURL: git@github.com:FR19/vps-infra.git
       targetRevision: main
       ref: values
   destination:
