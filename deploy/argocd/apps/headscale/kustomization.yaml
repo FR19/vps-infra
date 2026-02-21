@@ -1,8 +1,0 @@
-# Resources applied alongside the Headscale Helm release (Traefik CRD + cert-manager).
-# The Helm chart is deployed from the first source; this kustomization adds IngressRoute + Certificate.
-apiVersion: kustomize.config.k8s.io/v1beta1
-kind: Kustomization
-namespace: headscale
-resources:
-  - headscale-certificate.yaml
-  - headscale-ingressroute.yaml
