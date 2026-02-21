@@ -1,7 +1,7 @@
 # Wrapper chart values. Mailu subchart values are under "mailu:".
 # Top-level domain/hostnames are required so the Mailu chart sees .Values.domain when it validates (NOTES.txt).
 # Top-level ingress.enabled: false so the Mailu chart (when used as main or subchart) does not create its Ingress;
-# we use templates/mailu-web-ingress.yaml (port 80, Traefik + cert-manager) instead.
+# we use templates/mailu-web-ingressroute.yaml (Traefik IngressRoute) instead.
 domain: tukangketik.net
 hostnames:
   - mail.tukangketik.net
@@ -43,6 +43,23 @@ mailu:
     enabled: true
     size: 10Gi
 
+  # Authentik: forward auth + proxy auth headers. When enabled, Traefik IngressRoute
+  # uses ForwardAuth to Authentik and Mailu trusts PROXY_AUTH_HEADER from Traefik.
+  authentik:
+    enabled: true
+    # URL Traefik calls for forward auth (Authentik Traefik outpost).
+    forwardAuthUrl: "https://auth.tukangketik.net/outpost.goauthentik.io/auth/traefik"
+    # Backend for /outpost.goauthentik.io/* on the mail host (callback); same namespace as Mailu.
+    backendNamespace: auth
+    backendServiceName: authentik
+    backendPort: 80
+    # CIDRs to trust for proxy auth (Traefik / cluster). Must include Traefik pod IPs.
+    proxyAuthWhitelist: "10.42.0.0/16"
+    # Header set by Authentik outpost; Mailu uses this as the authenticated user email.
+    proxyAuthHeader: "X-Authentik-Email"
+    # Optional: redirect after logout from Mailu.
+    # proxyAuthLogoutUrl: "https://auth.tukangketik.net/application/o/authorize/..."
+
   front:
     hostPort:
       enabled: false
@@ -61,6 +78,31 @@ mailu:
     extraEnvVars:
       - name: TLS_FLAVOR
         value: mail
+      # Real IP and proxy auth (used when authentik.enabled; whitelist must include Traefik).
+      - name: REAL_IP_HEADER
+        value: X-Forwarded-For
+      - name: REAL_IP_FROM
+        value: "10.42.0.0/16"
+      - name: PROXY_AUTH_WHITELIST
+        value: "10.42.0.0/16"
+      - name: PROXY_AUTH_HEADER
+        value: "X-Authentik-Email"
+      # - name: PROXY_AUTH_CREATE
+      #   value: "false"
+      # - name: PROXY_AUTH_LOGOUT_URL
+      #   value: "https://auth.tukangketik.net/..."
+
+  # Admin needs same proxy auth env so /admin accepts header-based auth.
+  admin:
+    extraEnvVars:
+      - name: REAL_IP_HEADER
+        value: X-Forwarded-For
+      - name: REAL_IP_FROM
+        value: "10.42.0.0/16"
+      - name: PROXY_AUTH_WHITELIST
+        value: "10.42.0.0/16"
+      - name: PROXY_AUTH_HEADER
+        value: "X-Authentik-Email"
 
   smtp:
     enabled: true
