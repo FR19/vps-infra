@@ -1,0 +1,28 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: headscale
+  namespace: argocd
+spec:
+  project: vps-platform
+  sources:
+    - repoURL: https://charts.gabe565.com
+      chart: headscale
+      targetRevision: "0.16.0"
+      helm:
+        releaseName: headscale
+        valueFiles:
+          - $values/deploy/argocd/apps/headscale/values.yaml
+    - repoURL: https://github.com/FR19/vps-infra.git
+      targetRevision: main
+      ref: values
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: headscale
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true

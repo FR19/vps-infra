@@ -1,0 +1,95 @@
+# Headscale (Tailscale control server) — headscale.tukangketik.net
+# MagicDNS base: vpn.tukangketik.net (must differ from server_url host)
+
+image:
+  repository: ghcr.io/juanfont/headscale
+  tag: v0.25.0
+  pullPolicy: IfNotPresent
+
+env:
+  HEADSCALE_SERVER_URL: "https://headscale.tukangketik.net"
+  HEADSCALE_DNS_BASE_DOMAIN: "vpn.tukangketik.net"
+  HEADSCALE_DNS_MAGIC_DNS: "true"
+  HEADSCALE_DNS_NAMESERVERS_GLOBAL: "1.1.1.1 1.0.0.1"
+  HEADSCALE_DNS_OVERRIDE_LOCAL_DNS: "true"
+  HEADSCALE_PREFIXES_V4: "100.64.0.0/10"
+  HEADSCALE_PREFIXES_V6: "fd7a:115c:a1e0::/48"
+  HEADSCALE_DERP_URLS: "https://controlplane.tailscale.com/derpmap/default"
+  HEADSCALE_DERP_AUTO_UPDATE_ENABLED: "true"
+  HEADSCALE_DERP_UPDATE_FREQUENCY: "24h"
+  HEADSCALE_EPHEMERAL_NODE_INACTIVITY_TIMEOUT: "30m"
+  HEADSCALE_DISABLE_CHECK_UPDATES: "true"
+
+service:
+  main:
+    ports:
+      http:
+        port: 8080
+      metrics:
+        port: 9090
+      grpc:
+        enabled: false
+
+# Persist SQLite DB and keys
+persistence:
+  config:
+    enabled: true
+    mountPath: /var/lib/headscale
+    size: 1Gi
+    retain: true
+
+# Traefik Ingress + cert-manager for headscale.tukangketik.net
+ingress:
+  main:
+    enabled: true
+    ingressClassName: traefik
+    annotations:
+      cert-manager.io/cluster-issuer: letsencrypt-prod
+      traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    hosts:
+      - host: headscale.tukangketik.net
+        paths:
+          - path: /
+            pathType: Prefix
+    tls:
+      - secretName: headscale-tls
+        hosts:
+          - headscale.tukangketik.net
+
+# ACL: allow autogroup:member to reach tag:vps (and VPS hostname) on 443 and 22
+configMaps:
+  acl:
+    enabled: true
+    data:
+      policy: |
+        {
+          "groups": {
+            "group:admins": ["fakhrur"]
+          },
+          "tagOwners": {
+            "tag:vps": ["group:admins"]
+          },
+          "acls": [
+            {
+              "action": "accept",
+              "src": ["autogroup:member"],
+              "dst": ["tag:vps:443", "tag:vps:22"]
+            },
+            {
+              "action": "accept",
+              "src": ["autogroup:member"],
+              "dst": ["vps:443", "vps:22"]
+            }
+          ]
+        }
+  dns:
+    enabled: true
+    data:
+      # Placeholder: replace 100.64.0.1 with your VPS Tailnet IP after enrolling the VPS (see docs/vpn-headscale.md)
+      records: |
+        [
+          {"name": "argocd.tukangketik.net", "type": "A", "value": "100.64.0.1"}
+        ]
+
+postgresql:
+  enabled: false
