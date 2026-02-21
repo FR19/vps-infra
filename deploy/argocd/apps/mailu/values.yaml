@@ -55,9 +55,10 @@ mailu:
     backendNamespace: auth
     backendServiceName: authentik-server
     backendPort: 80
-    # Use a local ExternalName service (mailu-authentik-outpost) so Traefik does not need allowCrossNamespace.
-    # Set to true if your Traefik has allowCrossNamespace enabled and you prefer a direct cross-namespace ref.
-    useCrossNamespaceService: false
+    # Callback (/outpost.goauthentik.io/*) must reach Authentik or you get infinite redirect after login.
+    # true = direct ref to auth/authentik-server (requires Traefik allowCrossNamespace=true).
+    # false = use ExternalName service (Traefik often doesn't route to it; can cause redirect loop).
+    useCrossNamespaceService: true
     # CIDRs to trust for proxy auth. Must include the IPs Traefik uses when calling Mailu (pod or node CIDR).
     # See docs/mailu-install.md or docs/authentik-mailu-setup.md for how to find your cluster's range.
     proxyAuthWhitelist: "10.42.1.0/24"
