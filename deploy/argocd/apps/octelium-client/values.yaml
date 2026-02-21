@@ -1,9 +1,0 @@
-# Octelium client Helm values (reference).
-# Actual values are inlined in octelium-client.application.yaml; override there or via Argo CD UI.
-# See docs/octelium.md for setup (install cluster, create Secret, deploy).
-#
-# octelium:
-#   domain: "octelium.example.com"        # Your Octelium cluster domain (from install-cluster.sh)
-#   authTokenSecret: "octelium-auth-token"  # Secret in namespace octelium with auth token
-#   # authTokenSecretKey: "data"            # Optional; default key in the Secret (default: data)
-#   serve: []  # Optional: services to expose over VPN, e.g. ["argocd-server.argocd.svc.cluster.local"]
