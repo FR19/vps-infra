@@ -45,7 +45,8 @@ ingress:
   main:
     enabled: false
 
-# ACL: allow all tailnet members (autogroup:member) to reach tag:vps and VPS hostname on 443 and 22.
+# ACL: allow all tailnet members (autogroup:member) to reach tag:vps on 443 and 22.
+# (Reference tag:vps only; hostname "vps" would need to be in policy "hosts" with an IP.)
 configMaps:
   acl:
     enabled: true
@@ -63,11 +64,6 @@ configMaps:
               "action": "accept",
               "src": ["autogroup:member"],
               "dst": ["tag:vps:443", "tag:vps:22"]
-            },
-            {
-              "action": "accept",
-              "src": ["autogroup:member"],
-              "dst": ["vps:443", "vps:22"]
             }
           ]
         }
