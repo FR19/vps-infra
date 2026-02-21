@@ -47,10 +47,10 @@ mailu:
   # uses ForwardAuth to Authentik and Mailu trusts PROXY_AUTH_HEADER from Traefik.
   authentik:
     enabled: true
-    # URL Traefik calls for forward auth (Authentik Traefik outpost).
-    # If you get 404 from Authentik, try the in-cluster URL so Host/X-Forwarded-Host are not overwritten:
-    #   forwardAuthUrl: "http://authentik-server.auth.svc.cluster.local/outpost.goauthentik.io/auth/traefik"
-    forwardAuthUrl: "https://auth.tukangketik.net/outpost.goauthentik.io/auth/traefik"
+    # URL Traefik calls for forward auth. In-cluster avoids Host being overwritten (fixes 404).
+    forwardAuthUrl: "http://authentik-server.auth.svc.cluster.local/outpost.goauthentik.io/auth/traefik"
+    # External URL (use if in-cluster fails or you need auth via public host):
+    # forwardAuthUrl: "https://auth.tukangketik.net/outpost.goauthentik.io/auth/traefik"
     # Backend for /outpost.goauthentik.io/* on the mail host (callback).
     backendNamespace: auth
     backendServiceName: authentik-server
