@@ -7,6 +7,8 @@ image:
   pullPolicy: IfNotPresent
 
 env:
+  # CLI needs a config file; init writes one to persistence mount. Point CLI at it.
+  HEADSCALE_CONFIG: "/var/lib/headscale/config.yaml"
   HEADSCALE_SERVER_URL: "https://headscale.tukangketik.net"
   HEADSCALE_DNS_BASE_DOMAIN: "vpn.tukangketik.net"
   HEADSCALE_DNS_MAGIC_DNS: "true"
@@ -38,23 +40,10 @@ persistence:
     size: 1Gi
     retain: true
 
-# Traefik Ingress + cert-manager for headscale.tukangketik.net
+# Ingress disabled: we use Traefik IngressRoute (headscale-ingressroute.yaml) + Certificate (headscale-certificate.yaml).
 ingress:
   main:
-    enabled: true
-    ingressClassName: traefik
-    annotations:
-      cert-manager.io/cluster-issuer: letsencrypt-prod
-      traefik.ingress.kubernetes.io/router.entrypoints: websecure
-    hosts:
-      - host: headscale.tukangketik.net
-        paths:
-          - path: /
-            pathType: Prefix
-    tls:
-      - secretName: headscale-tls
-        hosts:
-          - headscale.tukangketik.net
+    enabled: false
 
 # ACL: allow autogroup:member to reach tag:vps (and VPS hostname) on 443 and 22
 configMaps:

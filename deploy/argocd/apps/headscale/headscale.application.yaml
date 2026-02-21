@@ -16,6 +16,7 @@ spec:
     - repoURL: git@github.com:FR19/vps-infra.git
       targetRevision: main
       ref: values
+      path: deploy/argocd/apps/headscale
   destination:
     server: https://kubernetes.default.svc
     namespace: headscale

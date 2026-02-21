@@ -1,0 +1,19 @@
+# Traefik IngressRoute for Headscale (replaces standard Ingress). Backend on port 8080 (HTTP).
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: headscale
+  namespace: headscale
+  labels:
+    app.kubernetes.io/name: headscale
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`headscale.tukangketik.net`)
+      kind: Rule
+      services:
+        - name: headscale
+          port: 8080
+  tls:
+    secretName: headscale-tls

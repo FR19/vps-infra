@@ -1,0 +1,13 @@
+# cert-manager Certificate for Headscale TLS (used by IngressRoute).
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: headscale-tls
+  namespace: headscale
+spec:
+  secretName: headscale-tls
+  issuerRef:
+    name: letsencrypt-prod
+    kind: ClusterIssuer
+  dnsNames:
+    - headscale.tukangketik.net
