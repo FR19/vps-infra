@@ -51,10 +51,11 @@ mailu:
     forwardAuthUrl: "https://auth.tukangketik.net/outpost.goauthentik.io/auth/traefik"
     # Backend for /outpost.goauthentik.io/* on the mail host (callback); same namespace as Mailu.
     backendNamespace: auth
-    backendServiceName: authentik
+    backendServiceName: authentik-server
     backendPort: 80
-    # CIDRs to trust for proxy auth (Traefik / cluster). Must include Traefik pod IPs.
-    proxyAuthWhitelist: "10.42.0.0/16"
+    # CIDRs to trust for proxy auth. Must include the IPs Traefik uses when calling Mailu (pod or node CIDR).
+    # See docs/mailu-install.md or docs/authentik-mailu-setup.md for how to find your cluster's range.
+    proxyAuthWhitelist: "10.42.1.0/24"
     # Header set by Authentik outpost; Mailu uses this as the authenticated user email.
     proxyAuthHeader: "X-Authentik-Email"
     # Optional: redirect after logout from Mailu.
@@ -82,9 +83,9 @@ mailu:
       - name: REAL_IP_HEADER
         value: X-Forwarded-For
       - name: REAL_IP_FROM
-        value: "10.42.0.0/16"
+        value: "10.42.1.0/24"
       - name: PROXY_AUTH_WHITELIST
-        value: "10.42.0.0/16"
+        value: "10.42.1.0/24"
       - name: PROXY_AUTH_HEADER
         value: "X-Authentik-Email"
       # - name: PROXY_AUTH_CREATE
@@ -98,9 +99,9 @@ mailu:
       - name: REAL_IP_HEADER
         value: X-Forwarded-For
       - name: REAL_IP_FROM
-        value: "10.42.0.0/16"
+        value: "10.42.1.0/24"
       - name: PROXY_AUTH_WHITELIST
-        value: "10.42.0.0/16"
+        value: "10.42.1.0/24"
       - name: PROXY_AUTH_HEADER
         value: "X-Authentik-Email"
 
