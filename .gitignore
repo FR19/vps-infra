@@ -2,3 +2,4 @@
 deploy/argocd/apps/argocd/charts/
 deploy/argocd/apps/mailu/charts/
 deploy/argocd/repo-credentials.template.yaml
+deploy/argocd/apps/argocd/values-oidc-secret.yaml

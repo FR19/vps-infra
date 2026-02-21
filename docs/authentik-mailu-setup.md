@@ -1,8 +1,8 @@
-# Authentik setup for Mailu (detailed)
+# Authentik setup for Mailu
 
-This guide walks you through configuring [Authentik](https://goauthentik.io/) so that the Mailu web UI is protected by SSO (forward auth). Your Traefik IngressRoute already calls Authentik for auth and passes the user’s email to Mailu via headers; here we configure the **Application**, **Proxy Provider**, **Outpost**, and **access** in Authentik.
+This guide configures [Authentik](https://goauthentik.io/) so the Mailu web UI is protected by SSO (forward auth). You will configure the **Application**, **Proxy Provider**, **Outpost**, and **access policies** in Authentik.
 
-**Prerequisites:** Authentik is deployed and reachable (e.g. `https://auth.tukangketik.net`). Mailu values have `mailu.authentik.enabled: true` and the correct `forwardAuthUrl` (see [mailu-install.md](mailu-install.md#authentik-integration-optional)).
+**Prerequisites:** Authentik is deployed and reachable (e.g. `https://auth.tukangketik.net`). Mailu has `mailu.authentik.enabled: true` and the correct `forwardAuthUrl`, `backendServiceName`, and `backendPort` (see [mailu-install.md](mailu-install.md#authentik-integration-optional)). Traefik must have **allowCrossNamespace** enabled (apply `deploy/traefik/k3s-allow-cross-namespace.yaml` and restart Traefik); see [Troubleshooting: Infinite redirect](#infinite-redirect-after-login).
 
 ---
 
@@ -71,12 +71,39 @@ Authentik uses an **Outpost** to handle proxy/forward-auth. The Helm chart usual
 2. Open the **Embedded Outpost** (or the outpost you use for proxy apps). Its type should be **Proxy**.
 3. In **Applications**, ensure **Mailu** is in the list. If not, add it and save.
 4. Confirm the outpost is **Running** and **Connected** — see [How to ensure the outpost is Running and Connected](#how-to-ensure-the-outpost-is-running-and-connected) below.
+5. **Disable the outpost Ingress** so it does not claim the mail host — see [4a. Disable outpost Ingress for the mail host](#4a-disable-outpost-ingress-for-the-mail-host) below.
 
 The forward auth URL we use in Traefik is:
 
 `https://auth.tukangketik.net/outpost.goauthentik.io/auth/traefik`
 
 That is served by the same Authentik server that hosts the embedded outpost (same host, path `/outpost.goauthentik.io/...`). So no separate outpost URL is needed in Traefik; just the `forwardAuthUrl` in your Mailu values.
+
+### 4a. Disable outpost Ingress for the mail host
+
+Authentik’s Kubernetes integration can create an **Ingress** for the Embedded Outpost. If that Ingress is created with host **mail.tukangketik.net** (the same as Mailu), Traefik will have two resources claiming the same host (the Mailu IngressRoute in `mailu` and the outpost Ingress in `auth`). That causes wrong routing and redirect loops.
+
+**Check:** `kubectl get ingress -n auth`. If you see `ak-outpost-authentik-embedded-outpost` with host **mail.tukangketik.net**, fix it:
+
+**Option A – Outpost Configuration (YAML / Advanced)**  
+1. **Applications** → **Outposts** → open **Embedded Outpost** (click the name or edit/pencil icon).  
+2. Look for **Configuration**, **Advanced**, **Config**, or a **YAML** section on the outpost detail/edit page.  
+3. Find `kubernetes_disabled_components` (may be an empty list `[]` or a multi-select). Add **`ingress`** so it reads e.g. `['ingress']`. Save.
+
+**Option B – System Integrations (Kubernetes connection)**  
+1. In the sidebar go to **System** → **Integrations** (or **Federation** → **Integrations**, depending on version).  
+2. Open the **Kubernetes** integration/connection used by your cluster.  
+3. In that connection’s settings, find **Kubernetes Disabled Components** and add **`ingress`**. Save.
+
+**Option C – Delete the Ingress (immediate fix)**  
+If you cannot find the setting in the UI, delete the Ingress so Traefik stops using it:  
+`kubectl delete ingress -n auth ak-outpost-authentik-embedded-outpost`  
+Authentik may recreate it on next sync unless you disable the component via Option A or B (or the [Authentik API](https://docs.goauthentik.io/docs/developer-docs/api/) with `kubernetes_disabled_components: ["ingress"]`).
+
+After disabling the component (A or B), also run:  
+`kubectl delete ingress -n auth ak-outpost-authentik-embedded-outpost`
+
+Only the **Mailu** IngressRoute (in namespace `mailu`) should handle **mail.tukangketik.net**; the callback path `/outpost.goauthentik.io/*` is routed to the outpost service in `auth` (e.g. `ak-outpost-authentik-embedded-outpost`) by that IngressRoute. See [Runbooks – Outpost Ingress claims mail host](runbooks.md#outpost-ingress-claims-mail-host-wrong-routing-or-redirect-loop).
 
 ---
 
@@ -156,10 +183,11 @@ So for each person who should use Mailu via Authentik:
 
 ## 7. Test the flow
 
-1. In a private/incognito window (or after logging out of Authentik), open **https://mail.tukangketik.net**.
-2. You should be redirected to Authentik to log in (e.g. `https://auth.tukangketik.net/...`).
-3. Log in with a user that has access to the Mailu application.
-4. After login, you should be redirected back to **https://mail.tukangketik.net** and see the Mailu UI (webmail or admin) as that user — provided that email exists as a Mailu user.
+1. **Use a private/incognito window** (or log out of Authentik first). If you’re already logged into Authentik in the same browser, you’ll go straight to Mailu and never see the login page — that’s expected.
+2. Open **https://mail.tukangketik.net**.
+3. You should be redirected to Authentik to log in (e.g. `https://auth.tukangketik.net/...`).
+4. Log in with a user that has access to the Mailu application.
+5. After login, you should be redirected back to **https://mail.tukangketik.net** and see the Mailu UI (webmail or admin) as that user — provided that email exists as a Mailu user.
 
 If you get a redirect loop or “Invalid redirect uri”:
 
@@ -175,6 +203,49 @@ To sign out from Mailu’s SSO session (Authentik cookie for this app):
 - Open: **https://mail.tukangketik.net/outpost.goauthentik.io/sign_out**
 
 That invalidates the Authentik session for this provider; the user will be asked to log in again on the next visit to Mailu.
+
+---
+
+## Troubleshooting
+
+### 404 Not Found (powered by authentik)
+
+The forward-auth request reaches Authentik but no Proxy Provider matches (wrong host or missing config). Verify in order:
+
+1. **Proxy Provider → External host** is exactly `https://mail.<your-domain>` (https, no trailing slash, same hostname as the browser).
+2. **Application → Mailu** has the Mailu **Proxy Provider** attached.
+3. **Outposts → Embedded Outpost** includes **Mailu** in Applications, and the outpost is **Connected** (see [Outpost not connected](#outpost-not-connected)).
+4. **Proxy Provider → Mode** is **Forward auth (Single application)**.
+5. **Mailu values** use the in-cluster outpost URL and the headers middleware so Authentik receives the mail host (see [mailu-install.md](mailu-install.md#authentik-integration-optional)). Sync the Mailu app after any change.
+6. Restart Authentik and retry in a private window: `kubectl rollout restart deployment/authentik -n auth`
+
+If 404 persists, check which host the outpost sees: `kubectl logs -n auth deployment/authentik -c server --tail=200 | grep -i outpost`
+
+### Infinite redirect after login
+
+The callback URL (`https://mail.<your-domain>/outpost.goauthentik.io/callback`) must be served by Authentik. If Traefik does not allow cross-namespace references, the route from the `mailu` namespace to the outpost service in `auth` fails, no cookie is set, and every request triggers login again.
+
+**Fix:** Enable Traefik `allowCrossNamespace` (K3s):
+
+```bash
+kubectl apply -f deploy/traefik/k3s-allow-cross-namespace.yaml
+kubectl rollout restart deployment -n kube-system -l app.kubernetes.io/name=traefik
+# If Traefik is a DaemonSet: kubectl rollout restart daemonset -n kube-system -l app.kubernetes.io/name=traefik
+```
+
+Then sync the Mailu app and try again in a **new incognito** window.
+
+If Traefik logs `secret auth/authentik-outpost-tls does not exist`, sync the **authentik** app (it creates that Certificate) or set the outpost Ingress secret to `authentik-tls` in Authentik UI. See [Runbooks – Traefik: authentik-outpost-tls](runbooks.md#traefik-secret-authauthentik-outpost-tls-does-not-exist-authentik-outpost).
+
+### No login page shown
+
+If you are already logged into Authentik in the same browser, forward auth succeeds and you go straight to Mailu. Use a **private/incognito window** or log out of Authentik, then open the Mailu URL again.
+
+If you are in incognito and still land on Mailu without seeing the login page, confirm the Mailu IngressRoute and both middlewares (`mailu-forward-auth-headers`, `mailu-authentik-forward-auth`) exist in the `mailu` namespace.
+
+### Outpost not connected
+
+If the Embedded Outpost shows **Disconnected**, restart Authentik: `kubectl rollout restart deployment/authentik -n auth`. Ensure the Authentik server pod is running and that `authentik_host` / URL config matches how the outpost reaches the API. See [How to ensure the outpost is Running and Connected](#how-to-ensure-the-outpost-is-running-and-connected) for details.
 
 ---
 

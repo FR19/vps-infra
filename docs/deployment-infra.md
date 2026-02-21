@@ -1,6 +1,6 @@
-# Infra deployment guide
+# Infrastructure deployment guide
 
-This guide deploys the platform infrastructure:
+This guide deploys the platform infrastructure on a K3s cluster. All paths are relative to the **infra repository root**.
 
 - **cert-manager** with Let's Encrypt issuers
 - **Argo CD** (GitOps)
@@ -43,10 +43,10 @@ Ensure DNS for the Argo CD hostname (e.g. `argocd.example.com`) points to the VP
 
 ## 1) VPS bootstrap (on the VPS)
 
-From the infra repo:
+Run from your VPS bootstrap directory (e.g. `vps-setup/` if present in the repo):
 
 ```bash
-cd infra/vps-setup
+cd vps-setup
 
 # Optional: use a dedicated data disk
 sudo CONFIRM_ERASE_SDB=yes bash 00-storage-sdb.sh
@@ -75,7 +75,7 @@ If Helm does not use your kubeconfig (e.g. in scripts or IDEs), pass it explicit
 ## 3) Create namespaces
 
 ```bash
-kubectl apply -f infra/deploy/namespaces.yaml
+kubectl apply -f deploy/namespaces.yaml
 ```
 
 ## 4) Set domain variable
@@ -99,8 +99,8 @@ helm upgrade --install cert-manager jetstack/cert-manager \
 Apply Let's Encrypt issuers:
 
 ```bash
-kubectl apply -f infra/deploy/cert-manager/cluster-issuer-letsencrypt-staging.yaml
-kubectl apply -f infra/deploy/cert-manager/cluster-issuer-letsencrypt-prod.yaml
+kubectl apply -f deploy/cert-manager/cluster-issuer-letsencrypt-staging.yaml
+kubectl apply -f deploy/cert-manager/cluster-issuer-letsencrypt-prod.yaml
 ```
 
 ## 6) Install Argo CD
@@ -112,12 +112,12 @@ From the **infra repo root**:
 ```bash
 helm repo add argo https://argoproj.github.io/argo-helm
 helm repo update
-helm dependency update infra/deploy/argocd/helm
+helm dependency update deploy/argocd/helm
 
-helm upgrade --install argocd infra/deploy/argocd/helm \
+helm upgrade --install argocd deploy/argocd/helm \
   --namespace argocd \
   --create-namespace \
-  -f infra/deploy/argocd/helm/values.yaml
+  -f deploy/argocd/helm/values.yaml
 ```
 
 The bundled values configure TLS (cert-manager), Traefik ingress, `--insecure` for the server, and RBAC. After step 7, Argo CD will manage itself from Git using this same chart.
@@ -126,19 +126,19 @@ The bundled values configure TLS (cert-manager), Traefik ingress, `--insecure` f
 
 Apply the Argo CD project and the app-of-apps so Argo CD manages all infra from the repo.
 
-**Layout:** Each app lives in its own directory under `deploy/argocd/apps/` (e.g. `apps/argocd/`, `apps/authentik/`). The top-level `kustomization.yaml` includes all Application manifests. To add a new app, create a subdirectory and add its manifest to `kustomization.yaml`.
+**Layout:** Each app lives in its own directory under `deploy/argocd/apps/` (e.g. `argocd/`, `authentik/`). The top-level `kustomization.yaml` includes all Application manifests. To add a new app, create a subdirectory and add its manifest to `kustomization.yaml`.
 
 ```bash
-kubectl apply -f infra/deploy/argocd/project.yaml
+kubectl apply -f deploy/argocd/project.yaml
 
 # One-time: create repo credential Secret (edit the template first)
-kubectl apply -f infra/deploy/argocd/repo-credentials.template.yaml
+kubectl apply -f deploy/argocd/repo-credentials.template.yaml
 
-kubectl apply -f infra/deploy/argocd/app-of-apps.yaml
+kubectl apply -f deploy/argocd/app-of-apps.yaml
 
 # One-time: Authentik requires these Secrets before it can start
-./infra/scripts/create-auth-secret.sh
-./infra/scripts/create-auth-db-secret.sh
+./scripts/create-auth-secret.sh
+./scripts/create-auth-db-secret.sh
 ```
 
 Retrieve the initial admin password and log in:
@@ -160,10 +160,10 @@ After the **argocd** Application syncs, Argo CD manages itself from the repo and
 To apply changes from `deploy/argocd/helm/values.yaml` without reinstalling:
 
 ```bash
-helm dependency update infra/deploy/argocd/helm
-helm upgrade --install argocd infra/deploy/argocd/helm \
+helm dependency update deploy/argocd/helm
+helm upgrade --install argocd deploy/argocd/helm \
   --namespace argocd \
-  -f infra/deploy/argocd/helm/values.yaml
+  -f deploy/argocd/helm/values.yaml
 kubectl -n argocd rollout restart deployment argocd-server
 ```
 
@@ -176,10 +176,10 @@ To avoid manifest errors in Argo CD after editing Helm values, render the chart 
 **Authentik:**
 
 ```bash
-./infra/scripts/helm-template-authentik.sh
+./scripts/helm-template-authentik.sh
 ```
 
-Uses `infra/deploy/argocd/apps/authentik/authentik-values.yaml`. Keep that file in sync with the `values` block in `authentik.application.yaml`. Optional: `./infra/scripts/helm-template-authentik.sh path/to/other-values.yaml`.
+Uses `deploy/argocd/apps/authentik/authentik-values.yaml`. Keep that file in sync with the `values` block in `authentik.application.yaml`. Optional: `./scripts/helm-template-authentik.sh path/to/other-values.yaml`.
 
 **Other Helm-based apps:** Run `helm template <releaseName> <chart> --namespace <ns> -f <values-file>` with the same chart version and values as the Application.
 
@@ -197,8 +197,8 @@ Use when re-deploying infra from scratch. From the infra repo root (with `KUBECO
 **Script (recommended):**
 
 ```bash
-./infra/scripts/cleanup-infra.sh
-# Or: ./infra/scripts/cleanup-infra.sh --yes
+./scripts/cleanup-infra.sh
+# Or: ./scripts/cleanup-infra.sh --yes
 ```
 
 **Manual:**
@@ -246,4 +246,6 @@ For a full list of procedures: [Runbooks](runbooks.md).
 
 ## What's next
 
-- Deploy application services (CV, blog, frontend) by adding manifests under `infra/deploy/` or a separate repo and registering a dedicated Argo CD Application.
+- **Mailu (mail server):** To install the Mailu stack (webmail, SMTP, IMAP) managed by Argo CD, follow **[mailu-install.md](mailu-install.md)**. It covers domain configuration, creating the required secrets, syncing the mailu Application, and first login.
+- **Argo CD SSO:** To log in to Argo CD via Authentik (OIDC SSO), follow **[authentik-argocd-sso.md](authentik-argocd-sso.md)**.
+- Deploy application services (CV, blog, frontend) by adding manifests under `deploy/` or a separate repo and registering a dedicated Argo CD Application.

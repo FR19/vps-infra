@@ -1,6 +1,6 @@
 # Installing Mailu (mail server)
 
-This guide covers installing [Mailu](https://mailu.io) on your K3s cluster via the Argo CD Application in this repo. Mailu provides webmail, admin UI, SMTP (with STARTTLS on 587), and IMAP.
+This guide covers installing [Mailu](https://mailu.io) on your K3s cluster via the Argo CD Application in this repo. Mailu provides webmail, admin UI, SMTP (STARTTLS on 587), and IMAP. Paths are relative to the infra repository root.
 
 **What you get:**
 
@@ -148,15 +148,31 @@ In **`deploy/argocd/apps/mailu/values.yaml`**:
 mailu:
   authentik:
     enabled: true
-    forwardAuthUrl: "https://auth.<your-auth-domain>/outpost.goauthentik.io/auth/traefik"
+    # Use the outpost service (not authentik-server) for both forward auth and callback.
+    forwardAuthUrl: "http://ak-outpost-authentik-embedded-outpost.auth.svc.cluster.local:9000/outpost.goauthentik.io/auth/traefik"
     backendNamespace: auth
-    backendServiceName: authentik
-    backendPort: 80
+    backendServiceName: ak-outpost-authentik-embedded-outpost
+    backendPort: 9000
     proxyAuthWhitelist: "10.42.0.0/16"   # Cluster CIDR (must include Traefik)
     proxyAuthHeader: "X-Authentik-Email"
 ```
 
-Adjust `forwardAuthUrl` to your Authentik host and ensure `proxyAuthWhitelist` includes the CIDR of your Traefik pods (e.g. K3s default `10.42.0.0/16`).
+Use the **outpost service** (e.g. `ak-outpost-authentik-embedded-outpost`) for both `forwardAuthUrl` and `backendServiceName` so auth and cookies work correctly. Set `proxyAuthWhitelist` to your cluster CIDR. Traefik must have `allowCrossNamespace` enabled — see [authentik-mailu-setup.md](authentik-mailu-setup.md) (section 5c).
+
+#### Where to get `proxyAuthWhitelist`
+
+Mailu only accepts proxy auth (the `X-Authentik-Email` header) when the **source IP** of the request is in `proxyAuthWhitelist`. That source is **Traefik** (the pod or node that forwards traffic to Mailu). So the whitelist must include the CIDR from which Traefik’s requests come.
+
+- **K3s (default):** Pod CIDR is often **`10.42.0.0/16`**. Using that is safe and covers all cluster pods (including Traefik). If your cluster uses a different pod CIDR, use that instead.
+- **To confirm:** List Traefik pods and their IPs, then use a range that contains them:
+  ```bash
+  kubectl get pods -n <traefik-namespace> -o wide
+  ```
+  Or read the node’s pod CIDR:
+  ```bash
+  kubectl get nodes -o jsonpath='{.items[*].spec.podCIDR}'
+  ```
+  Use that CIDR (e.g. `10.42.0.0/24` per node) or the cluster-wide pod CIDR (e.g. `10.42.0.0/16`) in `proxyAuthWhitelist`. Prefer the cluster-wide range so it still works if Traefik moves to another node.
 
 ### Authentik setup
 

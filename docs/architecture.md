@@ -164,7 +164,7 @@ Adding new services is simplified through the service template:
 - Deployment-ready manifests
 - CI/CD workflow templates
 
-See the services repo templates README for detailed template usage (this workspace: `../../services/templates/README.md`).
+See the services repo templates README for detailed template usage.
 
 ## Scaling Considerations
 
