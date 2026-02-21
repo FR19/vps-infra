@@ -1,0 +1,18 @@
+{{- if and .Values.mailu .Values.mailu.authentik .Values.mailu.authentik.enabled }}
+# Set X-Forwarded-Host and X-Forwarded-Proto so Authentik receives the original app host
+# (Traefik sometimes sends the auth backend host instead; Authentik needs the Mailu host to match the provider).
+# Use this middleware *before* the forward-auth middleware in the IngressRoute.
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: mailu-forward-auth-headers
+  namespace: {{ .Release.Namespace | quote }}
+  labels:
+    app.kubernetes.io/name: {{ .Chart.Name }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+spec:
+  headers:
+    customRequestHeaders:
+      X-Forwarded-Host: {{ .Values.mailu.hostnames | first | quote }}
+      X-Forwarded-Proto: "https"
+{{- end }}

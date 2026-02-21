@@ -26,12 +26,14 @@ spec:
           namespace: {{ $.Values.mailu.authentik.backendNamespace }}
           port: {{ $.Values.mailu.authentik.backendPort | default 80 }}
     {{- end }}
-    # Main route: Mailu with ForwardAuth
+    # Main route: Mailu with ForwardAuth (headers first so Authentik gets X-Forwarded-Host for provider match)
     {{- range .Values.mailu.hostnames }}
     - match: Host(`{{ . }}`)
       kind: Rule
       priority: 10
       middlewares:
+        - name: mailu-forward-auth-headers
+          namespace: {{ $.Release.Namespace | quote }}
         - name: mailu-authentik-forward-auth
           namespace: {{ $.Release.Namespace | quote }}
       services:
