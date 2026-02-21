@@ -17,11 +17,15 @@ spec:
   routes:
     {{- if and .Values.mailu.authentik .Values.mailu.authentik.enabled }}
     # Higher priority: Authentik outpost callback (must be served by Authentik, not Mailu).
+    # Headers middleware ensures Authentik receives the mail host so it sets the session cookie for that domain.
     # Requires Traefik allowCrossNamespace=true (see deploy/traefik/README.md).
     {{- range .Values.mailu.hostnames }}
     - match: Host(`{{ . }}`) && PathPrefix(`/outpost.goauthentik.io/`)
       kind: Rule
       priority: 20
+      middlewares:
+        - name: mailu-forward-auth-headers
+          namespace: {{ $.Release.Namespace | quote }}
       services:
         - name: {{ $.Values.mailu.authentik.backendServiceName }}
           namespace: {{ $.Values.mailu.authentik.backendNamespace }}
