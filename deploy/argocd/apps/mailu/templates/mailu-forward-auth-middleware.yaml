@@ -12,8 +12,10 @@ spec:
   forwardAuth:
     address: {{ .Values.mailu.authentik.forwardAuthUrl | quote }}
     trustForwardHeader: true
-    # Force these headers to be sent to Authentik so the outpost can match the provider (fixes 404).
+    # Headers sent to Authentik. Must include Cookie so the session set at callback is sent on subsequent requests.
+    # Without Cookie, Authentik always returns 302 to login → "too many redirects".
     authRequestHeaders:
+      - Cookie
       - Host
       - X-Forwarded-Host
       - X-Forwarded-Proto
