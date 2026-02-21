@@ -13,6 +13,8 @@ metadata:
 spec:
   headers:
     customRequestHeaders:
+      # Authentik matches the provider by Host; Traefik often sends the auth backend host. Set all so outpost finds the app.
+      Host: {{ .Values.mailu.hostnames | first | quote }}
       X-Forwarded-Host: {{ .Values.mailu.hostnames | first | quote }}
       X-Forwarded-Proto: "https"
 {{- end }}

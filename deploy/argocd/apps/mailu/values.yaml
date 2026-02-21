@@ -48,11 +48,16 @@ mailu:
   authentik:
     enabled: true
     # URL Traefik calls for forward auth (Authentik Traefik outpost).
+    # If you get 404 from Authentik, try the in-cluster URL so Host/X-Forwarded-Host are not overwritten:
+    #   forwardAuthUrl: "http://authentik-server.auth.svc.cluster.local/outpost.goauthentik.io/auth/traefik"
     forwardAuthUrl: "https://auth.tukangketik.net/outpost.goauthentik.io/auth/traefik"
-    # Backend for /outpost.goauthentik.io/* on the mail host (callback); same namespace as Mailu.
+    # Backend for /outpost.goauthentik.io/* on the mail host (callback).
     backendNamespace: auth
     backendServiceName: authentik-server
     backendPort: 80
+    # Use a local ExternalName service (mailu-authentik-outpost) so Traefik does not need allowCrossNamespace.
+    # Set to true if your Traefik has allowCrossNamespace enabled and you prefer a direct cross-namespace ref.
+    useCrossNamespaceService: false
     # CIDRs to trust for proxy auth. Must include the IPs Traefik uses when calling Mailu (pod or node CIDR).
     # See docs/mailu-install.md or docs/authentik-mailu-setup.md for how to find your cluster's range.
     proxyAuthWhitelist: "10.42.1.0/24"
