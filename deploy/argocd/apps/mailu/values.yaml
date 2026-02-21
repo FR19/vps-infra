@@ -48,9 +48,9 @@ mailu:
   authentik:
     enabled: true
     # URL Traefik calls for forward auth. In-cluster avoids Host being overwritten (fixes 404).
-    # forwardAuthUrl: "http://authentik-server.auth.svc.cluster.local/outpost.goauthentik.io/auth/traefik"
+    forwardAuthUrl: "http://ak-outpost-authentik-embedded-outpost.auth.svc.cluster.local/outpost.goauthentik.io/auth/traefik"
     # External URL (use if in-cluster fails or you need auth via public host):
-    forwardAuthUrl: "https://auth.tukangketik.net/outpost.goauthentik.io/auth/traefik"
+    # forwardAuthUrl: "https://auth.tukangketik.net/outpost.goauthentik.io/auth/traefik"
     # Backend for /outpost.goauthentik.io/* on the mail host (callback). Requires Traefik allowCrossNamespace=true.
     backendNamespace: auth
     backendServiceName: ak-outpost-authentik-embedded-outpost
