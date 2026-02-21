@@ -1,0 +1,18 @@
+# K3s HelmChartConfig: enable Traefik CRD provider allowCrossNamespace.
+# Required for Mailu+Authentik so the callback route (mailu -> auth/authentik-server) works.
+# Apply once: kubectl apply -f deploy/traefik/k3s-allow-cross-namespace.yaml
+# Then restart Traefik: kubectl rollout restart deployment -n kube-system -l app.kubernetes.io/name=traefik
+# See: https://doc.traefik.io/traefik/v2.4/providers/kubernetes-crd/#allowcrossnamespace
+---
+apiVersion: helm.cattle.io/v1
+kind: HelmChartConfig
+metadata:
+  name: traefik
+  namespace: kube-system
+spec:
+  valuesContent: |-
+    # Allow IngressRoutes to reference Services (and other resources) in other namespaces.
+    # E.g. mailu IngressRoute -> auth/authentik-server for /outpost.goauthentik.io/*
+    providers:
+      kubernetesCRD:
+        allowCrossNamespace: true

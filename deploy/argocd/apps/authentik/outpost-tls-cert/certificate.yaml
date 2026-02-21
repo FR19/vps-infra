@@ -1,0 +1,16 @@
+# Certificate for the secret name expected by Authentik's Kubernetes outpost Ingress.
+# The Embedded Outpost creates an Ingress (ak-outpost-authentik-embedded-outpost) that
+# references secret "authentik-outpost-tls". Without this secret, Traefik logs:
+#   Error configuring TLS error="secret auth/authentik-outpost-tls does not exist"
+# and redirects (e.g. Mailu + Authentik) can fail with "too many redirects".
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: authentik-outpost-tls
+spec:
+  secretName: authentik-outpost-tls
+  issuerRef:
+    name: letsencrypt-prod
+    kind: ClusterIssuer
+  dnsNames:
+    - auth.tukangketik.net

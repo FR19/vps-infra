@@ -7,68 +7,72 @@ metadata:
     argocd.argoproj.io/sync-wave: "2"
 spec:
   project: vps-platform
-  source:
-    repoURL: https://charts.goauthentik.io
-    chart: authentik
-    targetRevision: 2025.12.4
-    helm:
-      releaseName: authentik
-      values: |
-        global:
-          revisionHistoryLimit: 2
-        postgresql:
-          enabled: true
-          auth:
-            existingSecret: authentik-postgresql
-            secretKeys:
-              userPasswordKey: password
-              adminPasswordKey: postgres-password
-          image:
-            tag: "latest"
-        redis:
-          enabled: true
-          image:
-            tag: "latest"
-
-        # Override chart default so deprecation check does not fire (we use server.ingress only)
-        ingress: null
-
-        server:
-          env:
-            - name: AUTHENTIK_SECRET_KEY
-              valueFrom:
-                secretKeyRef:
-                  name: authentik-secret-key
-                  key: secret_key
-            - name: AUTHENTIK_POSTGRESQL__PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: authentik-postgresql
-                  key: password
-          ingress:
+  sources:
+    - repoURL: https://charts.goauthentik.io
+      chart: authentik
+      targetRevision: 2025.12.4
+      helm:
+        releaseName: authentik
+        values: |
+          global:
+            revisionHistoryLimit: 2
+          postgresql:
             enabled: true
-            ingressClassName: traefik
-            annotations:
-              cert-manager.io/cluster-issuer: letsencrypt-prod
-            hosts:
-              - auth.tukangketik.net
-            pathType: Prefix
-            tls:
-              - secretName: authentik-tls
-                hosts:
-                  - auth.tukangketik.net
-        worker:
-          env:
-            - name: AUTHENTIK_SECRET_KEY
-              valueFrom:
-                secretKeyRef:
-                  name: authentik-secret-key
-                  key: secret_key
-            - name: AUTHENTIK_POSTGRESQL__PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: authentik-postgresql
-                  key: password
+            auth:
+              existingSecret: authentik-postgresql
+              secretKeys:
+                userPasswordKey: password
+                adminPasswordKey: postgres-password
+            image:
+              tag: "latest"
+          redis:
+            enabled: true
+            image:
+              tag: "latest"
+
+          # Override chart default so deprecation check does not fire (we use server.ingress only)
+          ingress: null
+
+          server:
+            env:
+              - name: AUTHENTIK_SECRET_KEY
+                valueFrom:
+                  secretKeyRef:
+                    name: authentik-secret-key
+                    key: secret_key
+              - name: AUTHENTIK_POSTGRESQL__PASSWORD
+                valueFrom:
+                  secretKeyRef:
+                    name: authentik-postgresql
+                    key: password
+            ingress:
+              enabled: true
+              ingressClassName: traefik
+              annotations:
+                cert-manager.io/cluster-issuer: letsencrypt-prod
+              hosts:
+                - auth.tukangketik.net
+              pathType: Prefix
+              tls:
+                - secretName: authentik-tls
+                  hosts:
+                    - auth.tukangketik.net
+          worker:
+            env:
+              - name: AUTHENTIK_SECRET_KEY
+                valueFrom:
+                  secretKeyRef:
+                    name: authentik-secret-key
+                    key: secret_key
+              - name: AUTHENTIK_POSTGRESQL__PASSWORD
+                valueFrom:
+                  secretKeyRef:
+                    name: authentik-postgresql
+                    key: password
+    # Outpost TLS: cert-manager Certificate for secret authentik-outpost-tls (expected by Authentik's outpost Ingress).
+    - repoURL: git@github.com:FR19/vps-infra.git
+      targetRevision: main
+      path: deploy/argocd/apps/authentik/outpost-tls-cert
   destination:
     server: https://kubernetes.default.svc
     namespace: auth
