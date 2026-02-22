@@ -12,7 +12,9 @@ env:
   HEADSCALE_SERVER_URL: "https://headscale.tukangketik.net"
   HEADSCALE_DNS_BASE_DOMAIN: "vpn.tukangketik.net"
   HEADSCALE_DNS_MAGIC_DNS: "true"
-  HEADSCALE_DNS_NAMESERVERS_GLOBAL: "1.1.1.1 1.0.0.1"
+  HEADSCALE_DNS_NAMESERVERS_GLOBAL: "94.140.14.14 94.140.15.15 8.8.8.8 1.1.1.1 1.0.0.1"
+  # Split DNS: route tukangketik.net (and argocd.tukangketik.net) to MagicDNS so clients get extra_records (Tailnet IP) instead of public DNS.
+  HEADSCALE_DNS_NAMESERVERS_SPLIT: '{"tukangketik.net": ["100.100.100.100"]}'
   HEADSCALE_DNS_OVERRIDE_LOCAL_DNS: "true"
   HEADSCALE_PREFIXES_V4: "100.64.0.0/10"
   HEADSCALE_PREFIXES_V6: "fd7a:115c:a1e0::/48"
@@ -89,16 +91,8 @@ configMaps:
   dns:
     enabled: true
     data:
-      # Placeholder: replace 100.64.0.1 with your VPS Tailnet IP after enrolling the VPS (see docs/vpn-headscale.md)
-      magic_dns: true
-      nameservers:
-        global:
-          - 1.1.1.1
-          - 1.0.0.1
-          - 8.8.8.8
-        split:
-          argocd.tukangketik.net:
-            - 100.100.100.100
+      # Extra records for MagicDNS (base_domain and nameservers are set via HEADSCALE_DNS_* env above).
+      # Replace 100.64.0.1 with your VPS Tailnet IP after enrolling the VPS (see docs/vpn-headscale.md).
       records: |
         [
           {"name": "argocd.tukangketik.net", "type": "A", "value": "100.64.0.1"}
