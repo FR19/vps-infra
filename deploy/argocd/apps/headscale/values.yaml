@@ -3,7 +3,7 @@
 
 image:
   repository: ghcr.io/juanfont/headscale
-  tag: v0.27.0
+  tag: v0.28.0
   pullPolicy: IfNotPresent
 
 env:
