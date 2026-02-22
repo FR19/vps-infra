@@ -16,9 +16,13 @@ env:
   HEADSCALE_DNS_OVERRIDE_LOCAL_DNS: "true"
   HEADSCALE_PREFIXES_V4: "100.64.0.0/10"
   HEADSCALE_PREFIXES_V6: "fd7a:115c:a1e0::/48"
-  HEADSCALE_DERP_URLS: "https://controlplane.tailscale.com/derpmap/default"
-  HEADSCALE_DERP_AUTO_UPDATE_ENABLED: "true"
-  HEADSCALE_DERP_UPDATE_FREQUENCY: "24h"
+  # DERP: avoid fetching from URL (cluster egress often gets TLS interception → cert for traefik.default).
+  # Use embedded DERP only; open UDP 3478 on the VPS firewall (see docs/vpn-headscale.md).
+  HEADSCALE_DERP_URLS: "[]"
+  HEADSCALE_DERP_AUTO_UPDATE_ENABLED: "false"
+  HEADSCALE_DERP_SERVER_ENABLED: "true"
+  HEADSCALE_DERP_SERVER_IPV4: "135.125.131.209" # Set to your VPS public IPv4 for stable DERP (e.g. in values or override).
+  HEADSCALE_DERP_SERVER_IPV6: "2001:41d0:701:1100::b9e3" # Optional: VPS public IPv6.
   HEADSCALE_EPHEMERAL_NODE_INACTIVITY_TIMEOUT: "30m"
   HEADSCALE_DISABLE_CHECK_UPDATES: "true"
   # OIDC (Authentik SSO): set issuer and client_id; set HEADSCALE_OIDC_CLIENT_SECRET via Secret (see docs/headscale-authentik-sso.md).
