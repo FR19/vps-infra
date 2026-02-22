@@ -7,4 +7,5 @@ resources:
   - headplane-deployment.yaml
   - headplane-service.yaml
   - headplane-certificate.yaml
+  - headplane-redirect-root-middleware.yaml
   - headplane-ingressroute.yaml

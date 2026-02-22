@@ -9,6 +9,13 @@ spec:
   entryPoints:
     - websecure
   routes:
+    - match: Host(`headplane.tukangketik.net`) && Path(`/`)
+      kind: Rule
+      middlewares:
+        - name: headplane-redirect-root
+      services:
+        - name: headplane
+          port: 3000
     - match: Host(`headplane.tukangketik.net`)
       kind: Rule
       services:

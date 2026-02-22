@@ -16,3 +16,6 @@ spec:
     providers:
       kubernetesCRD:
         allowCrossNamespace: true
+    additionalArguments:
+      - "--entrypoints.web.http.redirections.entrypoint.to=websecure"
+      - "--entrypoints.web.http.redirections.entrypoint.scheme=https"

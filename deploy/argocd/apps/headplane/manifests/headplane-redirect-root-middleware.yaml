@@ -1,0 +1,13 @@
+# Redirect root path (/) to /admin so visiting headplane.tukangketik.net works.
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: headplane-redirect-root
+  namespace: headplane
+  labels:
+    app.kubernetes.io/name: headplane
+spec:
+  redirectRegex:
+    regex: "^(https?://[^/]+)/?$"
+    replacement: "${1}/admin"
+    permanent: false
