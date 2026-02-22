@@ -1,0 +1,10 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: headplane
+# headplane-secrets is not in Git; create it manually (see docs/headplane-authentik-sso.md or docs/vpn-headscale.md).
+resources:
+  - headplane-configmap.yaml
+  - headplane-deployment.yaml
+  - headplane-service.yaml
+  - headplane-certificate.yaml
+  - headplane-ingressroute.yaml

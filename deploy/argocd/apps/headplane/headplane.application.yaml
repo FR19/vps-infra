@@ -1,0 +1,20 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: headplane
+  namespace: argocd
+spec:
+  project: vps-platform
+  source:
+    repoURL: git@github.com:FR19/vps-infra.git
+    targetRevision: main
+    path: deploy/argocd/apps/headplane/manifests
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: headplane
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

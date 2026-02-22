@@ -1,0 +1,40 @@
+# Headplane config (non-sensitive). Cookie and OIDC secrets come from Secret mounts.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: headplane-config
+  namespace: headplane
+  labels:
+    app.kubernetes.io/name: headplane
+data:
+  config.yaml: |
+    server:
+      host: "0.0.0.0"
+      port: 3000
+      base_url: "https://headplane.tukangketik.net"
+      cookie_secret_path: "/etc/headplane/secrets/cookie_secret"
+      cookie_secure: true
+      cookie_max_age: 86400
+      data_path: "/var/lib/headplane"
+
+    headscale:
+      url: "http://headscale.headscale.svc.cluster.local:8080"
+      public_url: "https://headscale.tukangketik.net"
+
+    integration:
+      docker:
+        enabled: false
+      kubernetes:
+        enabled: false
+      agent:
+        enabled: false
+
+    # OIDC (Authentik): use the same provider as Headscale (same client_id/secret) so user IDs match.
+    # Set client_id to the same value as in deploy/argocd/apps/headscale/values.yaml (HEADSCALE_OIDC_CLIENT_ID).
+    oidc:
+      issuer: "https://auth.tukangketik.net/application/o/headscale/"
+      client_id: "rt5cNGqJ4kIMmn1iVkL66oIPi4LMVlOie1rHhc02"
+      client_secret_path: "/etc/headplane/secrets/oidc_client_secret"
+      headscale_api_key_path: "/etc/headplane/secrets/headscale_api_key"
+      use_pkce: true
+      scope: "openid email profile groups"

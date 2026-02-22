@@ -7,4 +7,5 @@ resources:
   - cert-manager-issuers/cert-manager-issuers.application.yaml
   - authentik/authentik.application.yaml
   - headscale/headscale.application.yaml
+  - headplane/headplane.application.yaml
   - mailu/mailu.application.yaml

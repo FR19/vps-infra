@@ -1,0 +1,59 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: headplane
+  namespace: headplane
+  labels:
+    app.kubernetes.io/name: headplane
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: headplane
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: headplane
+    spec:
+      containers:
+        - name: headplane
+          image: ghcr.io/tale/headplane:0.6.1
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 3000
+              name: http
+          volumeMounts:
+            - name: config
+              mountPath: /etc/headplane/config.yaml
+              subPath: config.yaml
+              readOnly: true
+            - name: secrets
+              mountPath: /etc/headplane/secrets
+              readOnly: true
+            - name: data
+              mountPath: /var/lib/headplane
+      volumes:
+        - name: config
+          configMap:
+            name: headplane-config
+        - name: secrets
+          secret:
+            secretName: headplane-secrets
+            defaultMode: 0400
+        - name: data
+          persistentVolumeClaim:
+            claimName: headplane-data
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: headplane-data
+  namespace: headplane
+  labels:
+    app.kubernetes.io/name: headplane
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
