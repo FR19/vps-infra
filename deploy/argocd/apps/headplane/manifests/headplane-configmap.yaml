@@ -20,7 +20,7 @@ data:
     headscale:
       url: "http://headscale.headscale.svc.cluster.local:8080"
       public_url: "https://headscale.tukangketik.net"
-      config_strict: "false"
+      config_strict: false
 
     integration:
       docker:
@@ -28,7 +28,7 @@ data:
       kubernetes:
         enabled: false
         pod_name: "headscale"
-        validate_manifest: "true"
+        validate_manifest: true
       agent:
         enabled: false
         pre_authkey: " "   # Required by schema when agent block exists; ignored when enabled is false
@@ -42,5 +42,5 @@ data:
       headscale_api_key_path: "/etc/headplane/secrets/headscale_api_key"
       use_pkce: true
       scope: "openid email profile groups"
-      disable_api_key_login: "false"
+      disable_api_key_login: false
       token_endpoint_auth_method: "client_secret_post"
