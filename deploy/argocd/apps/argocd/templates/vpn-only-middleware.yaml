@@ -1,0 +1,17 @@
+{{- $argocd := index .Values "argo-cd" -}}
+{{- if and $argocd.server.ingress.enabled (eq $argocd.server.ingress.controller "generic") }}
+# Restrict Argo CD to VPN (Tailnet) traffic only. Allow 100.64.0.0/10 (Tailscale/Headscale).
+# See docs/vpn-headscale.md. Remove router.middlewares from server.ingress.annotations to disable.
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: argocd-vpn-only
+  namespace: {{ .Release.Namespace | quote }}
+  labels:
+    app.kubernetes.io/name: argocd-wrapper
+    app.kubernetes.io/component: vpn-only
+spec:
+  ipAllowList:
+    sourceRange:
+      - 100.64.0.0/10
+{{- end }}
