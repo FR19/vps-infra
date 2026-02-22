@@ -90,9 +90,9 @@ configMaps:
     enabled: true
     data:
       # Placeholder: replace 100.64.0.1 with your VPS Tailnet IP after enrolling the VPS (see docs/vpn-headscale.md)
-      "magicDNS": true,
-      "nameservers": ["100.100.100.100"],
-      "domains": ["tukangketik.net"],
+      magicDNS: true
+      nameservers: ["100.100.100.100"]
+      domains: ["tukangketik.net"]
       records: |
         [
           {"name": "argocd.tukangketik.net", "type": "A", "value": "100.64.0.1"}
