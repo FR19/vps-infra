@@ -36,7 +36,7 @@ env:
   HEADSCALE_OIDC_PKCE_ENABLED: "true"
   HEADSCALE_OIDC_PKCE_METHOD: "S256"
   # ACL policy stored in DB; manage via Headplane UI or Headscale API (see docs/vpn-headscale.md).
-  # HEADSCALE_POLICY_MODE: "database"
+  HEADSCALE_POLICY_MODE: "database"
 
 service:
   main:
@@ -68,24 +68,24 @@ ingress:
 # Example policy (groups, tagOwners, acls) is in docs/vpn-headscale.md.
 configMaps:
   acl:
-    enabled: true
-    data:
-      policy: |
-        {
-          "groups": {
-            "group:admins": ["president@"]
-          },
-          "tagOwners": {
-            "tag:vps": ["group:admins"]
-          },
-          "acls": [
-            {
-              "action": "accept",
-              "src": ["autogroup:member"],
-              "dst": ["tag:vps:443", "tag:vps:22"]
-            }
-          ]
-        }
+    enabled: false
+    # data:
+    #   policy: |
+    #     {
+    #       "groups": {
+    #         "group:admins": ["president@"]
+    #       },
+    #       "tagOwners": {
+    #         "tag:vps": ["group:admins"]
+    #       },
+    #       "acls": [
+    #         {
+    #           "action": "accept",
+    #           "src": ["autogroup:member"],
+    #           "dst": ["tag:vps:443", "tag:vps:22"]
+    #         }
+    #       ]
+    #     }
   dns:
     enabled: true
     data:
