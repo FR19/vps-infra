@@ -21,6 +21,14 @@ env:
   HEADSCALE_DERP_UPDATE_FREQUENCY: "24h"
   HEADSCALE_EPHEMERAL_NODE_INACTIVITY_TIMEOUT: "30m"
   HEADSCALE_DISABLE_CHECK_UPDATES: "true"
+  # OIDC (Authentik SSO): set issuer and client_id; set HEADSCALE_OIDC_CLIENT_SECRET via Secret (see docs/headscale-authentik-sso.md).
+  HEADSCALE_OIDC_ISSUER: "https://auth.tukangketik.net/application/o/headscale/"
+  HEADSCALE_OIDC_CLIENT_ID: "rt5cNGqJ4kIMmn1iVkL66oIPi4LMVlOie1rHhc02"
+  # HEADSCALE_OIDC_CLIENT_SECRET: set via kubectl or Secret (do not commit). Example: kubectl create secret generic headscale-oidc -n headscale --from-literal=client-secret='YOUR_SECRET'
+  HEADSCALE_OIDC_SCOPE: '["openid","profile","email","groups"]'
+  HEADSCALE_OIDC_PKCE_ENABLED: "true"
+  HEADSCALE_OIDC_PKCE_METHOD: "S256"
+  HEADSCALE_OIDC_STRIP_EMAIL_DOMAIN: "true"
 
 service:
   main:
