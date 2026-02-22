@@ -4,3 +4,4 @@ namespace: headscale
 resources:
   - headscale-certificate.yaml
   - headscale-ingressroute.yaml
+  - headscale-derp-service.yaml

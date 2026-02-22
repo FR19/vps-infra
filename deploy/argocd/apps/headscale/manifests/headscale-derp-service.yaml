@@ -1,0 +1,18 @@
+# Service for embedded DERP (STUN on UDP 3478). Targets the same pods as the main headscale Service.
+# For DERP to be reachable from the internet, the VPS must forward UDP 3478 to the pod; see docs/vpn-headscale.md.
+apiVersion: v1
+kind: Service
+metadata:
+  name: headscale-derp
+  namespace: headscale
+  labels:
+    app.kubernetes.io/name: headscale
+spec:
+  type: ClusterIP
+  ports:
+    - name: derp
+      port: 3478
+      targetPort: 3478
+      protocol: UDP
+  selector:
+    app.kubernetes.io/name: headscale
