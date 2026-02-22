@@ -21,7 +21,7 @@ env:
   # Empty string: Headscale uses viper.GetStringSlice("derp.urls"); viper uses cast.ToStringSlice; for string, cast uses strings.Fields("") → [] (empty). Do not use "[]" or it is treated as a single URL and fails with "unsupported protocol scheme".
   HEADSCALE_DERP_URLS: ""
   HEADSCALE_DERP_AUTO_UPDATE_ENABLED: "false"
-  HEADSCALE_DERP_SERVER_ENABLED: "true"
+  HEADSCALE_DERP_SERVER_ENABLED: "false"
   HEADSCALE_DERP_SERVER_STUN_LISTEN_ADDR: "0.0.0.0:3478"
   HEADSCALE_DERP_SERVER_PRIVATE_KEY_PATH: "/var/lib/headscale/derp_server_private.key"
   HEADSCALE_DERP_SERVER_IPV4: "135.125.131.209" # Set to your VPS public IPv4 for stable DERP (e.g. in values or override).
