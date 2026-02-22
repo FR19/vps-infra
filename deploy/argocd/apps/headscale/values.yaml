@@ -32,7 +32,6 @@ env:
   HEADSCALE_OIDC_SCOPE: '["openid","profile","email","groups"]'
   HEADSCALE_OIDC_PKCE_ENABLED: "true"
   HEADSCALE_OIDC_PKCE_METHOD: "S256"
-  HEADSCALE_OIDC_STRIP_EMAIL_DOMAIN: "true"
 
 service:
   main:
