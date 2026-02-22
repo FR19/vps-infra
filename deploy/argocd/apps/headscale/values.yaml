@@ -19,7 +19,7 @@ env:
   # DERP: avoid fetching from URL (cluster egress often gets TLS interception → cert for traefik.default).
   # Use embedded DERP only; open UDP 3478 on the VPS firewall (see docs/vpn-headscale.md).
   # Empty string: Headscale uses viper.GetStringSlice("derp.urls"); viper uses cast.ToStringSlice; for string, cast uses strings.Fields("") → [] (empty). Do not use "[]" or it is treated as a single URL and fails with "unsupported protocol scheme".
-  HEADSCALE_DERP_URLS: ""
+  HEADSCALE_DERP_URLS: "https://controlplane.tailscale.com/derpmap/default"
   HEADSCALE_DERP_AUTO_UPDATE_ENABLED: "false"
   HEADSCALE_DERP_SERVER_ENABLED: "false"
   HEADSCALE_DERP_SERVER_STUN_LISTEN_ADDR: "0.0.0.0:3478"
