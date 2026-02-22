@@ -3,7 +3,7 @@
 
 image:
   repository: ghcr.io/juanfont/headscale
-  tag: v0.28.0
+  tag: v0.27.1
   pullPolicy: IfNotPresent
 
 env:
@@ -35,6 +35,8 @@ env:
   HEADSCALE_OIDC_SCOPE: '["openid","profile","email","groups"]'
   HEADSCALE_OIDC_PKCE_ENABLED: "true"
   HEADSCALE_OIDC_PKCE_METHOD: "S256"
+  # ACL policy stored in DB; manage via Headplane UI or Headscale API (see docs/vpn-headscale.md).
+  HEADSCALE_POLICY_MODE: "database"
 
 service:
   main:
@@ -59,28 +61,14 @@ ingress:
   main:
     enabled: false
 
-# ACL: allow all tailnet members (autogroup:member) to reach tag:vps on 443 and 22.
-# (Reference tag:vps only; hostname "vps" would need to be in policy "hosts" with an IP.)
+# ACL: policy.mode is "database" (HEADSCALE_POLICY_MODE above). Policy is managed in the DB via
+# Headplane UI (headplane.tukangketik.net) or Headscale API; file-based ACL configMap is disabled.
+# To restore the previous file-based policy in the DB, use Headplane → ACL/Policy or:
+#   curl -H "Authorization: Bearer $API_KEY" -X POST https://headscale.tukangketik.net/api/v1/policy -d @policy.json
+# Example policy (groups, tagOwners, acls) is in docs/vpn-headscale.md.
 configMaps:
   acl:
-    enabled: true
-    data:
-      policy: |
-        {
-          "groups": {
-            "group:admins": ["president@"]
-          },
-          "tagOwners": {
-            "tag:vps": ["group:admins"]
-          },
-          "acls": [
-            {
-              "action": "accept",
-              "src": ["autogroup:member"],
-              "dst": ["tag:vps:443", "tag:vps:22"]
-            }
-          ]
-        }
+    enabled: false
   dns:
     enabled: true
     data:
@@ -90,5 +78,8 @@ configMaps:
           {"name": "argocd.tukangketik.net", "type": "A", "value": "100.64.0.1"}
         ]
 
+# Optional: use PostgreSQL as Headscale's main DB (users, nodes, keys, and policy when policy.mode=database).
+# Not required for policy.mode=database — that only means "store ACL in the same DB Headscale uses" (here: SQLite on the persistence volume).
+# Headscale recommends SQLite; Postgres is legacy. Leave disabled unless you need a shared DB.
 postgresql:
   enabled: false
