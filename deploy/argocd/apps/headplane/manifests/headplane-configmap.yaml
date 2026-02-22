@@ -31,7 +31,7 @@ data:
         validate_manifest: "true"
       agent:
         enabled: false
-        pre_authkey: ""
+        pre_authkey: " "   # Required by schema when agent block exists; ignored when enabled is false
 
     # OIDC (Authentik): use the same provider as Headscale (same client_id/secret) so user IDs match.
     # Set client_id to the same value as in deploy/argocd/apps/headscale/values.yaml (HEADSCALE_OIDC_CLIENT_ID).
