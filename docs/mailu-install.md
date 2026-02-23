@@ -149,7 +149,8 @@ mailu:
   authentik:
     enabled: true
     # Use the outpost service (not authentik-server) for both forward auth and callback.
-    forwardAuthUrl: "http://ak-outpost-authentik-embedded-outpost.auth.svc.cluster.local:9000/outpost.goauthentik.io/auth/traefik"
+    # Note the trailing dot after cluster.local: avoids Kubernetes ndots/search-domain resolving to a wildcard public DNS record.
+    forwardAuthUrl: "http://ak-outpost-authentik-embedded-outpost.auth.svc.cluster.local.:9000/outpost.goauthentik.io/auth/traefik"
     backendNamespace: auth
     backendServiceName: ak-outpost-authentik-embedded-outpost
     backendPort: 9000

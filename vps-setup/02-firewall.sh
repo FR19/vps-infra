@@ -30,10 +30,19 @@ ufw allow 80/tcp comment 'HTTP'
 # Allow HTTPS (port 443)
 ufw allow 443/tcp comment 'HTTPS'
 
+# Tailscale DNS (CoreDNS forwarding resolver for VPN clients)
+ufw allow 53/tcp comment 'Tailscale DNS'
+ufw allow 53/udp comment 'Tailscale DNS'
+
 # Mail (Mailu front LoadBalancer) - may be blocked by cloud provider; see docs/runbooks.md
 ufw allow 25/tcp comment 'SMTP'
 ufw allow 587/tcp comment 'Submission'
 ufw allow 993/tcp comment 'IMAPS'
+
+# Tailscale / Headscale WireGuard (see docs/vpn-headscale.md)
+ufw allow 41641/udp comment 'Tailscale WireGuard'
+# Headscale embedded DERP (STUN for NAT traversal)
+ufw allow 3478/udp comment 'Headscale DERP STUN'
 
 # Show rules
 ufw show added
@@ -46,4 +55,4 @@ ufw --force enable
 ufw status verbose
 
 echo "=== Firewall configuration complete ==="
-echo "Allowed ports: 22 (SSH), 80 (HTTP), 443 (HTTPS), 25/587 (SMTP), 993 (IMAP)"
+echo "Allowed ports: 22 (SSH), 53 (DNS), 80 (HTTP), 443 (HTTPS), 25/587 (SMTP), 993 (IMAP), 41641/udp (Tailscale), 3478/udp (Headscale DERP)"

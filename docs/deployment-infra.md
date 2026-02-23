@@ -1,10 +1,6 @@
 # Infrastructure deployment guide
 
-This guide deploys the platform infrastructure on a K3s cluster. All paths are relative to the **infra repository root**.
-
-- **cert-manager** with Let's Encrypt issuers
-- **Argo CD** (GitOps)
-- **Authentik** (identity provider)
+This guide deploys the base platform infrastructure on a K3s cluster: **cert-manager** (Let's Encrypt), **Argo CD** (GitOps), and **Authentik** (identity provider). All paths are relative to the **infra repository root**.
 
 ---
 
@@ -248,4 +244,6 @@ For a full list of procedures: [Runbooks](runbooks.md).
 
 - **Mailu (mail server):** To install the Mailu stack (webmail, SMTP, IMAP) managed by Argo CD, follow **[mailu-install.md](mailu-install.md)**. It covers domain configuration, creating the required secrets, syncing the mailu Application, and first login.
 - **Argo CD SSO:** To log in to Argo CD via Authentik (OIDC SSO), follow **[authentik-argocd-sso.md](authentik-argocd-sso.md)**.
+- **VPN-only Argo CD (Headscale):** To make Argo CD reachable only over VPN and enroll devices, follow **[vpn-headscale.md](vpn-headscale.md)**.
+- **VPN-only internal apps:** To add new VPN-only hostnames behind `incluster-vpn`, follow **[vpn-only-apps.md](vpn-only-apps.md)**.
 - Deploy application services (CV, blog, frontend) by adding manifests under `deploy/` or a separate repo and registering a dedicated Argo CD Application.

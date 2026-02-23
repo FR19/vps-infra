@@ -2,7 +2,7 @@
 
 This guide configures [Argo CD](https://argo-cd.readthedocs.io/) to use [Authentik](https://goauthentik.io/) as the OIDC provider for SSO login (in addition to or instead of the built-in admin account). Paths are relative to the infra repository root.
 
-**Prerequisites:** Authentik is deployed and reachable (e.g. `https://auth.tukangketik.net`). Argo CD is deployed and its URL is known (e.g. `https://argocd.tukangketik.net`).
+**Prerequisites:** Authentik is deployed and reachable (e.g. `https://auth.tukangketik.net`). Argo CD is deployed and its URL is known (e.g. `https://argocd.tukangketik.net`). If Argo CD is configured as **VPN-only**, connect to the VPN before testing login.
 
 ---
 
