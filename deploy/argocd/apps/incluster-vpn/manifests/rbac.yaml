@@ -4,11 +4,16 @@ metadata:
   name: incluster-vpn-tailscale
   namespace: incluster-vpn
 rules:
-  # tailscaled stores its state in a Secret by default when running in Kubernetes.
+  # tailscaled stores its state in a Secret when running in Kubernetes.
+  # RBAC note: Secret "create" cannot be safely restricted by resourceNames, since the
+  # object doesn't exist yet at authorization time.
+  - apiGroups: [""]
+    resources: ["secrets"]
+    verbs: ["create"]
   - apiGroups: [""]
     resources: ["secrets"]
     resourceNames: ["incluster-vpn-tailscale"]
-    verbs: ["get", "create", "update", "patch"]
+    verbs: ["get", "update", "patch", "watch"]
   # Optional but recommended: allow tailscaled to write Events for debugging.
   - apiGroups: [""]
     resources: ["events"]
