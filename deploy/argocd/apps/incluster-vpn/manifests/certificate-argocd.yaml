@@ -1,0 +1,12 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: argocd-tukangketik-net
+  namespace: incluster-vpn
+spec:
+  secretName: incluster-vpn-argocd-tls
+  issuerRef:
+    kind: ClusterIssuer
+    name: letsencrypt-prod-ovh-dns01
+  dnsNames:
+    - argocd.tukangketik.net

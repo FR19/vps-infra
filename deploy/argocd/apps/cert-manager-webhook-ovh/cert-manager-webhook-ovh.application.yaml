@@ -1,0 +1,33 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: cert-manager-webhook-ovh
+  namespace: argocd
+  annotations:
+    # Needs cert-manager CRDs + controller first
+    argocd.argoproj.io/sync-wave: "1"
+spec:
+  project: vps-platform
+  source:
+    repoURL: https://github.com/baarde/cert-manager-webhook-ovh
+    chart: cert-manager-webhook-ovh
+    targetRevision: 0.9.1
+    helm:
+      releaseName: cert-manager-webhook-ovh
+      values: |
+        # Must be unique; referenced by ClusterIssuer webhook.groupName
+        groupName: acme.tukangketik.net
+
+        certManager:
+          namespace: cert-manager
+          serviceAccountName: cert-manager
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: cert-manager
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true

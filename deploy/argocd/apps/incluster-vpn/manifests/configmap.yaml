@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: incluster-vpn-caddy
+  namespace: incluster-vpn
+data:
+  Caddyfile: |
+    {
+      auto_https off
+      admin off
+    }
+
+    # Add more host blocks here as you expose more internal services over the tailnet.
+    # Each additional hostname should have its own TLS cert+key mounted into this pod.
+
+    argocd.tukangketik.net:443 {
+      tls /certs/argocd/tls.crt /certs/argocd/tls.key
+      reverse_proxy http://argocd-server.argocd.svc.cluster.local:80
+    }

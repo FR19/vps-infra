@@ -3,7 +3,9 @@ kind: Kustomization
 
 resources:
   - argocd/argocd.application.yaml
+  - incluster-vpn/incluster-vpn.application.yaml
   - cert-manager/cert-manager.application.yaml
+  - cert-manager-webhook-ovh/cert-manager-webhook-ovh.application.yaml
   - cert-manager-issuers/cert-manager-issuers.application.yaml
   - authentik/authentik.application.yaml
   - headscale/headscale.application.yaml

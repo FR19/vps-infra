@@ -15,6 +15,7 @@ spec:
     - https://charts.bitnami.com/bitnami
     - https://github.com/jetstack/cert-manager
     - https://github.com/goauthentik/authentik
+    - https://github.com/baarde/cert-manager-webhook-ovh
   destinations:
     - namespace: "*"
       server: https://kubernetes.default.svc

@@ -1,0 +1,20 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: incluster-vpn
+  namespace: argocd
+spec:
+  project: vps-platform
+  source:
+    repoURL: git@github.com:FR19/vps-infra.git
+    targetRevision: main
+    path: deploy/argocd/apps/incluster-vpn/manifests
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: incluster-vpn
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
