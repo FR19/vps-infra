@@ -23,8 +23,10 @@ data:
         log
     }
   tukangketik.hosts: |
-    # Tailnet IP for VPN-only services (Argo CD)
-    100.64.0.1 argocd.tukangketik.net
+    # Tailnet IP for VPN-only services (Argo CD).
+    # If you deploy the in-cluster Argo CD VPN proxy (`argocd-vpn-proxy` app),
+    # update this record to the proxy pod's Tailnet IP (not the VPS Tailnet IP).
+    100.64.0.2 argocd.tukangketik.net
     # VPS public IP for public services (update if your VPS IP differs)
     135.125.131.209 headscale.tukangketik.net headplane.tukangketik.net auth.tukangketik.net
     # Add more as needed: mail.tukangketik.net, device.vpn.tukangketik.net, etc.
