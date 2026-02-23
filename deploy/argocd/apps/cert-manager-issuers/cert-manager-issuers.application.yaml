@@ -14,7 +14,9 @@ spec:
     path: deploy/cert-manager
     directory:
       recurse: false
-      include: "cluster-issuer-*.yaml"
+      # Keep this app responsible for all cert-manager namespace-scoped YAMLs
+      # in deploy/cert-manager (issuers + any supporting RBAC manifests).
+      include: "*.yaml"
   destination:
     server: https://kubernetes.default.svc
     namespace: cert-manager
