@@ -14,7 +14,8 @@ spec:
             groupName: acme.tukangketik.net
             solverName: ovh
             config:
-              endpoint: ovh-eu
+              # OVH endpoints are region-specific. OVH Canada accounts must use ovh-ca.
+              endpoint: ovh-ca
               authenticationMethod: application
               applicationKeyRef:
                 name: ovh-credentials
