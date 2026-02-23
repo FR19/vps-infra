@@ -11,6 +11,11 @@ metadata:
   namespace: kube-system
 spec:
   valuesContent: |-
+    # Ensure Traefik uses in-cluster DNS even if it runs with hostNetwork.
+    # Without this, Kubernetes service names may resolve via public DNS (and break ForwardAuth to Authentik outpost).
+    deployment:
+      dnsPolicy: ClusterFirstWithHostNet
+
     # Allow IngressRoutes to reference Services (and other resources) in other namespaces.
     # E.g. mailu IngressRoute -> auth/authentik-server for /outpost.goauthentik.io/*
     providers:

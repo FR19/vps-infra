@@ -10,10 +10,10 @@ Required for **Mailu + Authentik** when the callback route (`/outpost.goauthenti
 
 1. Apply the HelmChartConfig (once):
    ```bash
-   kubectl apply -f deploy/traefik/k3s-allow-cross-namespace.yaml
+   kubectl apply -f deploy/traefik/helmchartconfig.yaml
    ```
 
-2. Restart Traefik so it picks up the new provider setting:
+2. Restart Traefik so it picks up the new settings:
    ```bash
    kubectl rollout restart deployment -n kube-system -l app.kubernetes.io/name=traefik
    ```
