@@ -1597,7 +1597,7 @@ argo-cd:
         traefik.ingress.kubernetes.io/router.entrypoints: websecure
         traefik.ingress.kubernetes.io/service.serversscheme: http
         # VPN-only: allow Tailnet IPs only (see docs/vpn-headscale.md)
-        # traefik.ingress.kubernetes.io/router.middlewares: argocd-argocd-vpn-only@kubernetescrd
+        traefik.ingress.kubernetes.io/router.middlewares: argocd-argocd-vpn-only@kubernetescrd
       aws:
         backendProtocolVersion: GRPC
         serviceAnnotations: {}
