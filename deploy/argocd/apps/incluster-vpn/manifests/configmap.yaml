@@ -15,5 +15,10 @@ data:
 
     argocd.tukangketik.net:443 {
       tls /certs/argocd/tls.crt /certs/argocd/tls.key
-      reverse_proxy http://argocd-server.argocd.svc.cluster.local:80
+
+      @vpn remote_ip 100.64.0.0/10 127.0.0.1/32
+      handle @vpn {
+        reverse_proxy http://argocd-server.argocd.svc.cluster.local:80
+      }
+      respond 403
     }

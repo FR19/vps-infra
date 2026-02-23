@@ -1603,7 +1603,8 @@ argo-cd:
         serviceAnnotations: {}
         serviceType: NodePort
       controller: generic
-      enabled: true
+      # Disable public ingress. Argo CD is exposed over tailnet via `incluster-vpn` instead.
+      enabled: false
       extraHosts: []
       extraPaths: []
       extraRules: []
