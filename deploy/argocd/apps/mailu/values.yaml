@@ -49,7 +49,8 @@ mailu:
   authentik:
     enabled: true
     # URL Traefik calls for forward auth. Point at the outpost service (K8s integration creates e.g. ak-outpost-authentik-embedded-outpost).
-    forwardAuthUrl: "http://ak-outpost-authentik-embedded-outpost.auth.svc.cluster.local:9000/outpost.goauthentik.io/auth/traefik"
+    # Note the trailing dot after cluster.local: avoids Kubernetes ndots/search-domain resolving to a wildcard public DNS record.
+    forwardAuthUrl: "http://ak-outpost-authentik-embedded-outpost.auth.svc.cluster.local.:9000/outpost.goauthentik.io/auth/traefik"
     # External URL (use if in-cluster fails or you need auth via public host):
     # forwardAuthUrl: "https://auth.tukangketik.net/outpost.goauthentik.io/auth/traefik"
     # Backend for /outpost.goauthentik.io/* on the mail host (callback). Use the same outpost service. Requires Traefik allowCrossNamespace=true.
