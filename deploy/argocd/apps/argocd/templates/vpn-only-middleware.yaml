@@ -2,8 +2,8 @@
 {{- if and $argocd.server.ingress.enabled (eq $argocd.server.ingress.controller "generic") }}
 # Restrict Argo CD to VPN (Tailnet) traffic only.
 # Primary allow: 100.64.0.0/10 (Tailscale/Headscale).
-# Note: If traffic is forwarded via kube-proxy chains (KUBE-EXT-*), kube-proxy may SNAT/masquerade,
-# and Traefik will see the source as the node/pod network (10.42.0.0/16 on k3s by default).
+# Note: Avoid adding cluster CIDRs (e.g. k3s pod CIDR 10.42.0.0/16) here. kube-proxy can SNAT
+# public traffic to those ranges, which would accidentally make Argo CD publicly accessible.
 # See docs/vpn-headscale.md. Remove router.middlewares from server.ingress.annotations to disable.
 apiVersion: traefik.io/v1alpha1
 kind: Middleware
@@ -17,6 +17,5 @@ spec:
   ipAllowList:
     sourceRange:
       - 100.64.0.0/10
-      - 10.42.0.0/16    # k3s pod CIDR (kube-proxy masquerade source)
       - 127.0.0.1/32    # VPS localhost (for local curl/health checks)
 {{- end }}
