@@ -89,7 +89,7 @@ configMaps:
     #       ]
     #     }
   dns:
-    enabled: true
+    enabled: false
     data:
       # Extra records for MagicDNS (base_domain and nameservers are set via HEADSCALE_DNS_* env above).
       # Replace 100.64.0.1 with your VPS Tailnet IP after enrolling the VPS (see docs/vpn-headscale.md).
