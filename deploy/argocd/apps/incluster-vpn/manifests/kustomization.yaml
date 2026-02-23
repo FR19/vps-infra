@@ -6,4 +6,6 @@ resources:
   - certificate-argocd.yaml
   - pvc.yaml
   - configmap.yaml
+  - serviceaccount.yaml
+  - rbac.yaml
   - deployment.yaml

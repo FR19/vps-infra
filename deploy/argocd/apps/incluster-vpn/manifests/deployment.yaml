@@ -13,6 +13,7 @@ spec:
       labels:
         app.kubernetes.io/name: incluster-vpn
     spec:
+      serviceAccountName: incluster-vpn
       containers:
         - name: tailscale
           image: ghcr.io/tailscale/tailscale:stable
@@ -27,8 +28,20 @@ spec:
               value: incluster-vpn
             - name: TS_STATE_DIR
               value: /var/lib/tailscale
+            # Use a dedicated Secret name for tailscaled state in this namespace.
+            - name: TS_KUBE_SECRET
+              value: incluster-vpn-tailscale
             - name: TS_EXTRA_ARGS
               value: --login-server=https://headscale.tukangketik.net --accept-dns=false
+            # Enable tailscaled debug Events in this namespace.
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: POD_UID
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.uid
           securityContext:
             runAsUser: 0
             capabilities:
