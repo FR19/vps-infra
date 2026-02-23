@@ -10,7 +10,9 @@ metadata:
 data:
   Corefile: |
     .:53 {
-        forward . 94.140.14.14 94.140.15.15 8.8.8.8 1.1.1.1
+        forward . 94.140.14.14 94.140.15.15 8.8.8.8 1.1.1.1 {
+            policy sequential
+        }
         cache
         log
     }
@@ -18,7 +20,9 @@ data:
         hosts /etc/coredns/tukangketik.hosts tukangketik.net {
             fallthrough
         }
-        forward . 94.140.14.14 94.140.15.15 8.8.8.8
+        forward . 94.140.14.14 94.140.15.15 8.8.8.8 1.1.1.1 {
+            policy sequential
+        }
         cache
         log
     }
