@@ -1,0 +1,20 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: tailscale-dns
+  namespace: argocd
+spec:
+  project: vps-platform
+  source:
+    repoURL: git@github.com:FR19/vps-infra.git
+    targetRevision: main
+    path: deploy/argocd/apps/tailscale-dns/manifests
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: tailscale-dns
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

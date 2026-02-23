@@ -8,4 +8,5 @@ resources:
   - authentik/authentik.application.yaml
   - headscale/headscale.application.yaml
   - headplane/headplane.application.yaml
+  - tailscale-dns/tailscale-dns.application.yaml
   - mailu/mailu.application.yaml

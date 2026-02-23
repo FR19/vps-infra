@@ -1,0 +1,30 @@
+# CoreDNS config: serve tukangketik.net from hosts file, forward everything else.
+# Add more records to tukangketik.hosts as needed (argocd, headscale, headplane, auth, mail, etc.).
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: tailscale-dns-config
+  namespace: tailscale-dns
+  labels:
+    app.kubernetes.io/name: tailscale-dns
+data:
+  Corefile: |
+    .:53 {
+        forward . 94.140.14.14 94.140.15.15 8.8.8.8 1.1.1.1
+        cache
+        log
+    }
+    tukangketik.net:53 {
+        hosts /etc/coredns/tukangketik.hosts tukangketik.net {
+            fallthrough
+        }
+        forward . 94.140.14.14 94.140.15.15 8.8.8.8
+        cache
+        log
+    }
+  tukangketik.hosts: |
+    # Tailnet IP for VPN-only services (Argo CD)
+    100.64.0.1 argocd.tukangketik.net
+    # VPS public IP for public services (update if your VPS IP differs)
+    135.125.131.209 headscale.tukangketik.net headplane.tukangketik.net auth.tukangketik.net
+    # Add more as needed: mail.tukangketik.net, device.vpn.tukangketik.net, etc.
