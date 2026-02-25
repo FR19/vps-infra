@@ -11,6 +11,10 @@ stalwart-mail:
   image:
     tag: "v0.15.5"
 
+  # Disable init-container backup to avoid long first startup (init can take many minutes).
+  backup:
+    enabled: false
+
   # cert-manager Certificate creates secret stalwart-tls (subchart). IngressRoute (wrapper) uses same secret.
   certificate:
     certmanager:
