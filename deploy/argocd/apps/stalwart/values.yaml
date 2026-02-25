@@ -15,6 +15,17 @@ stalwart-mail:
   backup:
     enabled: false
 
+  # Allow time for first-time webadmin zip download so pod can become Ready (avoids Argo CD stuck Progressing).
+  readinessProbe:
+    httpGet:
+      path: "/healthz/ready"
+      port: "http"
+      httpHeaders:
+        - name: "X-Forwarded-For"
+          value: "127.0.0.1"
+    initialDelaySeconds: 90
+    periodSeconds: 10
+
   # cert-manager Certificate creates secret stalwart-tls (subchart). IngressRoute (wrapper) uses same secret.
   certificate:
     certmanager:
@@ -39,9 +50,33 @@ stalwart-mail:
 
   # Directory: Authentik LDAP outpost (create in Authentik UI; outpost service name usually ak-outpost-ldap in auth namespace)
   config:
-    # Direct webadmin zip URL (avoids GitHub /latest redirect which often fails from pods).
-    resource:
-      webadmin: "https://github.com/stalwartlabs/webadmin/releases/download/v0.1.37/webadmin.zip"
+    # So our custom config keys are written to config file (not only to DB). Required for webadmin.resource.
+    config:
+      local-keys:
+        - "store.*"
+        - "directory.*"
+        - "tracer.*"
+        - "!server.blocked-ip.*"
+        - "server.*"
+        - "authentication.fallback-admin.*"
+        - "cluster.*"
+        - "config.local-keys.*"
+        - "storage.data"
+        - "storage.blob"
+        - "storage.lookup"
+        - "storage.fts"
+        - "storage.directory"
+        - "certificate.*"
+        - "server.allowed-ip.*"
+        - "metrics.prometheus.*"
+        - "auth.dkim.sign.*"
+        - "auth.dkim.verify"
+        - "http.use-x-forwarded"
+        - "report.domain"
+        - "webadmin.resource"
+    # Direct webadmin zip URL (avoids GitHub /latest redirect which often fails from pods). Key is webadmin.resource per Stalwart docs.
+    webadmin:
+      resource: "https://github.com/stalwartlabs/webadmin/releases/download/v0.1.37/webadmin.zip"
     storage:
       directory: "ldap"
     directory:
