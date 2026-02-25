@@ -11,7 +11,7 @@ env:
   HEADSCALE_CONFIG: "/var/lib/headscale/config.yaml"
   HEADSCALE_SERVER_URL: "https://headscale.tukangketik.net"
   HEADSCALE_DNS_BASE_DOMAIN: "vpn.tukangketik.net"
-  HEADSCALE_DNS_MAGIC_DNS: "true"
+  HEADSCALE_DNS_MAGIC_DNS: "false"
   # Custom CoreDNS (tailscale-dns app): single resolver for all domains. Serves tukangketik.net from hosts, forwards rest to 94.140.14.14 etc. No split needed; nslookup/curl work consistently. See docs/vpn-headscale.md.
   HEADSCALE_DNS_NAMESERVERS_GLOBAL: "100.64.0.1"
   HEADSCALE_DNS_NAMESERVERS_SPLIT: "{}"
