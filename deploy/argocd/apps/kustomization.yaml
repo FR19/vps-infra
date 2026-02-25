@@ -12,3 +12,5 @@ resources:
   - headplane/headplane.application.yaml
   - tailscale-dns/tailscale-dns.application.yaml
   - mailu/mailu.application.yaml
+  - stalwart/stalwart.application.yaml
+  - sogo/sogo.application.yaml

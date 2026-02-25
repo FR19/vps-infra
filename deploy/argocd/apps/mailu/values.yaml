@@ -1,7 +1,8 @@
 # Wrapper chart values. Mailu subchart values are under "mailu:".
 # Top-level domain/hostnames are required so the Mailu chart sees .Values.domain when it validates (NOTES.txt).
 # Top-level ingress.enabled: false so the Mailu chart (when used as main or subchart) does not create its Ingress;
-# we use templates/mailu-web-ingressroute.yaml (Traefik IngressRoute) instead.
+# we use templates/mailu-web-ingressroute.yaml (Traefik IngressRoute) when webIngress.enabled.
+# Set mailu.webIngress.enabled: false so mail.tukangketik.net is served by Stalwart instead.
 domain: tukangketik.net
 hostnames:
   - mail.tukangketik.net
@@ -9,6 +10,9 @@ ingress:
   enabled: false
 
 mailu:
+  # Disable so mail.tukangketik.net is not claimed by Mailu (Stalwart uses it).
+  webIngress:
+    enabled: false
   domain: tukangketik.net
   revisionHistoryLimit: 2
   hostnames:

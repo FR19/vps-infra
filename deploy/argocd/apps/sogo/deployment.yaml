@@ -1,0 +1,59 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sogo
+  namespace: sogo
+  labels:
+    app.kubernetes.io/name: sogo
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: sogo
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: sogo
+    spec:
+      containers:
+        - name: sogo
+          image: salvoxia/sogo:latest
+          ports:
+            - containerPort: 80
+              name: http
+          volumeMounts:
+            - name: config
+              mountPath: /srv/etc
+              readOnly: true
+            - name: ldap-bind
+              mountPath: /run/secrets
+              readOnly: true
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "100m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 10
+            periodSeconds: 5
+      volumes:
+        - name: config
+          configMap:
+            name: sogo-config
+        - name: ldap-bind
+          secret:
+            secretName: sogo-ldap-bind
+            items:
+              - key: bindpw
+                path: ldap-bind-password

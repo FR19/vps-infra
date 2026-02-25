@@ -1,0 +1,27 @@
+# Stalwart Mail Server (Community Edition). Auth via Authentik LDAP outpost.
+# Prerequisites: Create LDAP Provider + LDAP Outpost in Authentik (docs/authentik-ldap-mail-setup.md).
+# Create secret: kubectl create secret generic stalwart-ldap-bind -n mail --from-literal=LDAP_BIND_PASSWORD='<password>'
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: stalwart
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: git@github.com:FR19/vps-infra.git
+    targetRevision: main
+    path: deploy/argocd/apps/stalwart
+    helm:
+      releaseName: stalwart-mail
+      valueFiles:
+        - values.yaml
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: mail
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

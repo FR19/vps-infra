@@ -1,0 +1,18 @@
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: sogo
+  namespace: sogo
+  labels:
+    app.kubernetes.io/name: sogo
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`webmail.tukangketik.net`)
+      kind: Rule
+      services:
+        - name: sogo
+          port: 80
+  tls:
+    secretName: sogo-tls

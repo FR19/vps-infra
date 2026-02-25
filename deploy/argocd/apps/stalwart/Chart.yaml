@@ -1,0 +1,9 @@
+apiVersion: v2
+name: stalwart-app
+description: Stalwart Mail Server with Authentik LDAP (wrapper)
+type: application
+version: 0.1.0
+dependencies:
+  - name: stalwart-mail
+    repository: oci://codeberg.org/wrenix/helm-charts
+    version: "0.4.9"

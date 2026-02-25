@@ -1,0 +1,64 @@
+# Wrapper chart: subchart values under stalwart-mail. We use Traefik IngressRoute (templates/) instead of standard Ingress.
+# Chart 0.4.9 / app v0.15.5 is current as of Feb 2026.
+# Create secret before sync: kubectl create secret generic stalwart-ldap-bind -n mail --from-literal=LDAP_BIND_PASSWORD='<service-account-password>'
+# See docs/authentik-ldap-mail-setup.md for Authentik LDAP provider + outpost.
+
+# Hostname for Stalwart webadmin (used by wrapper IngressRoute).
+hostname: mail.tukangketik.net
+
+stalwart-mail:
+  replicaCount: 1
+  image:
+    tag: "v0.15.5"
+
+  # cert-manager Certificate creates secret stalwart-tls (subchart). IngressRoute (wrapper) uses same secret.
+  certificate:
+    certmanager:
+      enabled: true
+      dnsNames:
+        - mail.tukangketik.net
+      issuerRef:
+        name: letsencrypt-prod
+        kind: ClusterIssuer
+
+  persistence:
+    enabled: true
+    size: 10Gi
+
+  service:
+    type: LoadBalancer
+    externalTrafficPolicy: Local
+
+  # We use Traefik IngressRoute (wrapper templates/stalwart-web-ingressroute.yaml), not standard Ingress.
+  ingress:
+    enabled: false
+
+  # Directory: Authentik LDAP outpost (create in Authentik UI; outpost service name usually ak-outpost-ldap in auth namespace)
+  config:
+    storage:
+      directory: "ldap"
+    directory:
+      ldap:
+        type: "ldap"
+        url: "ldap://ak-outpost-ldap-outpost.auth.svc.cluster.local:389"
+        base-dn: "dc=ldap,dc=goauthentik,dc=io"
+        bind:
+          dn: "cn=ldapservice,ou=users,dc=ldap,dc=goauthentik,dc=io"
+          secret: "%{env:LDAP_BIND_PASSWORD}%"
+          auth:
+            method: "lookup"
+        filter:
+          name: "(&(objectClass=user)(|(cn=?)(mail=?)))"
+          email: "(&(objectClass=user)(|(mail=?)(mailAlias=?)))"
+        attributes:
+          name: "cn"
+          email: "mail"
+          secret-changed: "pwdChangedTime"
+
+  # LDAP bind password from secret (create stalwart-ldap-bind with key LDAP_BIND_PASSWORD)
+  secrets:
+    create: true
+    env: {}
+  envFrom:
+    - secretRef:
+        name: stalwart-ldap-bind

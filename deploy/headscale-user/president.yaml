@@ -1,0 +1,24 @@
+user:
+  id: 1
+  name: president
+  createdat:
+    seconds: 1771759733
+    nanos: 854166532
+  displayname: President
+  email: president@tukangketik.net
+  providerid: ""
+  provider: ""
+  profilepicurl: ""
+id: 1
+key: hskey-auth-Pmr0Vd4RDKIx-hWIK_1MNX5PGwUXpIgW13_J-rEj63VhtVgF1sb06614AL2iLqqcS5TNGJfwkPwzh
+reusable: true
+ephemeral: false
+used: false
+expiration:
+  seconds: 1771763354
+  nanos: 433648966
+createdat:
+  seconds: 1771759754
+  nanos: 435386263
+acltags:
+  - tag:vps

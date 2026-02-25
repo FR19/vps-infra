@@ -1,5 +1,6 @@
-{{- if .Values.mailu }}
+{{- if and .Values.mailu (ne (index (index .Values.mailu "webIngress" | default dict) "enabled") false) }}
 # Traefik IngressRoute for Mailu web UI (replaces standard Ingress). Backend on port 80 (HTTP).
+# Disable with mailu.webIngress.enabled: false when using Stalwart for mail.tukangketik.net.
 # When authentik.enabled, ForwardAuth protects the app and /outpost.goauthentik.io/* is routed to Authentik for callbacks.
 apiVersion: traefik.io/v1alpha1
 kind: IngressRoute

@@ -1,0 +1,6 @@
+dependencies:
+- name: stalwart-mail
+  repository: oci://codeberg.org/wrenix/helm-charts
+  version: 0.4.9
+digest: sha256:13edafe500b6a304d6c8a744d5c80041fa45c429c1b3922b36822ab98e72ea48
+generated: "2026-02-25T19:48:50.161474+07:00"

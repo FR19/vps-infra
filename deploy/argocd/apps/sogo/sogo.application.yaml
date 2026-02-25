@@ -1,0 +1,24 @@
+# SOGo webmail. Uses Stalwart for IMAP/SMTP and Authentik LDAP for login.
+# Prerequisites: Stalwart running in mail namespace; create secret sogo-ldap-bind in sogo namespace.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: sogo
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: git@github.com:FR19/vps-infra.git
+    targetRevision: main
+    path: deploy/argocd/apps/sogo
+    kustomize:
+      namespace: sogo
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: sogo
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

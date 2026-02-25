@@ -1,0 +1,22 @@
+{{- if .Values.hostname }}
+# Traefik IngressRoute for Stalwart webadmin (HTTP backend on port 80). TLS at Traefik.
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: stalwart-web
+  namespace: {{ .Release.Namespace | quote }}
+  labels:
+    app.kubernetes.io/name: {{ .Chart.Name }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`{{ .Values.hostname }}`)
+      kind: Rule
+      services:
+        - name: {{ .Release.Name }}-stalwart-mail
+          port: 80
+  tls:
+    secretName: stalwart-tls
+{{- end }}
