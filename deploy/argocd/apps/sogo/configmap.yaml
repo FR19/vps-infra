@@ -19,7 +19,7 @@ data:
         port = 389;
         baseDN = "ou=users,dc=ldap,dc=goauthentik,dc=io";
         bindDN = "cn=ldapservice,ou=users,dc=ldap,dc=goauthentik,dc=io";
-        bindPasswordFile = "/run/secrets/ldap-bind-password";
+        bindPasswordFile = "/run/sogo-secrets/ldap-bind-password";
         filter = "objectClass=user";
         CN = "cn";
         UID = "cn";

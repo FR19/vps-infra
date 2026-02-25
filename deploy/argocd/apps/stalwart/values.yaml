@@ -39,6 +39,9 @@ stalwart-mail:
 
   # Directory: Authentik LDAP outpost (create in Authentik UI; outpost service name usually ak-outpost-ldap in auth namespace)
   config:
+    # Direct webadmin zip URL (avoids GitHub /latest redirect which often fails from pods).
+    resource:
+      webadmin: "https://github.com/stalwartlabs/webadmin/releases/download/v0.1.37/webadmin.zip"
     storage:
       directory: "ldap"
     directory:
