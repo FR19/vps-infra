@@ -15,6 +15,23 @@ spec:
       labels:
         app.kubernetes.io/name: sogo
     spec:
+      initContainers:
+        # salvoxia/sogo expects writable /srv/etc and creates cron, apache-SOGo.conf at startup.
+        # Copy our ConfigMap into writable /srv/etc so main container finds sogo.conf and can create the rest.
+        - name: copy-config
+          image: busybox:1.36
+          command:
+            - sh
+            - -c
+            - |
+              mkdir -p /srv/etc
+              cp /config/sogo.conf /srv/etc/sogo.conf
+          volumeMounts:
+            - name: config
+              mountPath: /config
+              readOnly: true
+            - name: srv
+              mountPath: /srv
       containers:
         - name: sogo
           image: salvoxia/sogo:latest
@@ -22,9 +39,8 @@ spec:
             - containerPort: 80
               name: http
           volumeMounts:
-            - name: config
-              mountPath: /srv/etc
-              readOnly: true
+            - name: srv
+              mountPath: /srv
             # Writable /run so runtime can create service account mount at /var/run/secrets/... (image often has /var/run -> /run).
             - name: run
               mountPath: /run
@@ -55,6 +71,9 @@ spec:
         - name: config
           configMap:
             name: sogo-config
+        # emptyDir: SOGo writes cron/apache-SOGo.conf to /srv/etc; user data to /srv/lib. For persistence, use a PVC for /srv.
+        - name: srv
+          emptyDir: {}
         - name: run
           emptyDir: {}
         - name: ldap-bind
