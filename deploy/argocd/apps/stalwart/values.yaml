@@ -40,9 +40,11 @@ stalwart-mail:
     enabled: true
     size: 10Gi
 
+  # NodePort: Stalwart's LoadBalancer would expose 80/443 (webadmin) + 25/587/993 (mail). Traefik's
+  # svclb already holds 80 and 443, so svclb-stalwart cannot be scheduled ("didn't have free ports").
+  # NodePort avoids svclb; webadmin stays via Traefik IngressRoute. Open NodePorts in firewall for mail.
   service:
-    type: LoadBalancer
-    externalTrafficPolicy: Local
+    type: NodePort
 
   # We use Traefik IngressRoute (wrapper templates/stalwart-web-ingressroute.yaml), not standard Ingress.
   ingress:
