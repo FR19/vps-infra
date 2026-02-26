@@ -76,10 +76,14 @@ stalwart-mail:
         - "metrics.prometheus.*"
         - "auth.dkim.sign.*"
         - "auth.dkim.verify"
+        # - "signature.*"
         - "http.use-x-forwarded"
         - "http.permissive-cors"
         - "report.domain"
         - "webadmin.resource"
+    # SMTP banner and EHLO hostname (defaults to pod name otherwise). Use your mail hostname / reverse DNS.
+    server:
+      hostname: "mail.tukangketik.net"
     # Allow browser from webmail.tukangketik.net to call JMAP at mail.tukangketik.net (CORS).
     http:
       permissive-cors: true
@@ -88,6 +92,21 @@ stalwart-mail:
       fallback-admin:
         user: "admin"
         secret: "%{env:STALWART_FALLBACK_ADMIN_PASSWORD}%"
+    # DKIM: add from webadmin (Settings > Signature) to add a DKIM signature and get the DNS TXT. We keep auth.dkim.sign.* and signature.* in local-keys so webadmin changes persist. If you prefer config-based DKIM, uncomment the block below and see docs/stalwart-sogo-install.md.
+    # auth:
+    #   dkim:
+    #     sign:
+    #       - if: "listener != 'smtp'"
+    #         then: "['default']"
+    #       - else: false
+    # signature:
+    #   default:
+    #     private-key: "%{file:/data/dkim/rsa.key}%"
+    #     domain: "tukangketik.net"
+    #     selector: "default"
+    #     algorithm: "rsa-sha256"
+    #     canonicalization: "relaxed/relaxed"
+    #     headers: ["From","To","Cc","Date","Subject","Message-ID","MIME-Version","Content-Type"]
     # Direct webadmin zip URL (avoids GitHub /latest redirect which often fails from pods). Key is webadmin.resource per Stalwart docs.
     webadmin:
       resource: "https://github.com/stalwartlabs/webadmin/releases/download/v0.1.37/webadmin.zip"
