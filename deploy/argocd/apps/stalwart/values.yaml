@@ -81,9 +81,14 @@ stalwart-mail:
         - "http.permissive-cors"
         - "report.domain"
         - "webadmin.resource"
-    # SMTP banner and EHLO hostname (defaults to pod name otherwise). Use your mail hostname / reverse DNS.
+        - "sieve.trusted.*"
+    # SMTP banner, EHLO, and general Message-ID hostname. Set via env so it is not overridden by pod hostname.
     server:
-      hostname: "mail.tukangketik.net"
+      hostname: "%{env:STALWART_PUBLIC_HOSTNAME}%"
+    # Message-ID hostname for mail sent from Sieve scripts (vacation, notifications). Falls back to server.hostname if unset.
+    sieve:
+      trusted:
+        hostname: "%{env:STALWART_MESSAGE_ID_HOSTNAME}%"
     # Allow browser from webmail.tukangketik.net to call JMAP at mail.tukangketik.net (CORS).
     http:
       permissive-cors: true
@@ -143,9 +148,12 @@ stalwart-mail:
           secret-changed: "pwdChangedTime"
 
   # LDAP bind + fallback admin from secrets (create stalwart-ldap-bind, stalwart-fallback-admin in namespace mail).
+  # STALWART_PUBLIC_HOSTNAME: used for SMTP banner, EHLO, and Message-ID (server.hostname in config).
   secrets:
     create: true
-    env: {}
+    env:
+      STALWART_PUBLIC_HOSTNAME: "mail.tukangketik.net"
+      STALWART_MESSAGE_ID_HOSTNAME: "tukangketik.net"
   envFrom:
     - secretRef:
         name: stalwart-ldap-bind
