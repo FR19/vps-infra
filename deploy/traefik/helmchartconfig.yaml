@@ -23,6 +23,6 @@ spec:
         allowCrossNamespace: true
     # TCP entrypoints for Stalwart mail (25, 587, 993). Traefik must bind these (e.g. hostNetwork); then use IngressRouteTCP to forward to Stalwart.
     additionalArguments:
-      - "--entrypoints.smtp.address=:25"
-      - "--entrypoints.submission.address=:587"
-      - "--entrypoints.imaps.address=:993"
+      - "--entrypoints.smtp.address=:25/tcp"
+      - "--entrypoints.submission.address=:587/tcp"
+      - "--entrypoints.imaps.address=:993/tcp"
