@@ -83,9 +83,21 @@ stalwart-mail:
     # Direct webadmin zip URL (avoids GitHub /latest redirect which often fails from pods). Key is webadmin.resource per Stalwart docs.
     webadmin:
       resource: "https://github.com/stalwartlabs/webadmin/releases/download/v0.1.37/webadmin.zip"
+    # Default directory: "oidc" = JMAP webmail OAuth works (Stalwart validates Bearer via Authentik UserInfo); "ldap" = IMAP/SMTP password auth. Only one default.
     storage:
-      directory: "ldap"
+      directory: "oidc"
     directory:
+      # OIDC: validate Bearer token from jmap-webmail via Authentik UserInfo. Required for webmail OAuth (fixes 401 on /jmap/session).
+      oidc:
+        type: "oidc"
+        timeout: "5s"
+        endpoint:
+          url: "https://auth.tukangketik.net/application/o/userinfo/"
+          method: "userinfo"
+        fields:
+          email: "email"
+          username: "preferred_username"
+          full-name: "name"
       ldap:
         type: "ldap"
         url: "ldap://ak-outpost-ldap-outpost.auth.svc.cluster.local:389"
