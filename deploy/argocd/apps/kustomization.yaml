@@ -14,4 +14,6 @@ resources:
   # Mailu disabled; using Stalwart + SOGo. Re-enable by uncommenting:
   # - mailu/mailu.application.yaml
   - stalwart/stalwart.application.yaml
-  - sogo/sogo.application.yaml
+  # Webmail (use one; both use webmail.<domain>). Prefer jmap-webmail to avoid SOGo LDAP issues.
+  # - sogo/sogo.application.yaml
+  - jmap-webmail/jmap-webmail.application.yaml

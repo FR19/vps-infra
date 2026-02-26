@@ -1,0 +1,14 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: webmail-tls
+  namespace: webmail
+  labels:
+    app.kubernetes.io/name: jmap-webmail
+spec:
+  secretName: webmail-tls
+  issuerRef:
+    name: letsencrypt-prod
+    kind: ClusterIssuer
+  dnsNames:
+    - webmail.tukangketik.net
