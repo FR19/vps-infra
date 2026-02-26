@@ -13,6 +13,7 @@ spec:
       kind: Rule
       services:
         - name: jmap-webmail
+          namespace: webmail
           port: 3000
   tls:
     secretName: webmail-tls
