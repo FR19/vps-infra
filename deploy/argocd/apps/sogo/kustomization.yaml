@@ -3,8 +3,9 @@ kind: Kustomization
 namespace: sogo
 resources:
   - namespace.yaml
-  - configmap-sogo.conf.d.yaml
-  - deployment-sonroyaalmerol.yaml
+  # salvoxia: plist config; sonroyaalmerol image fails with "cannot find adaptor bundle: 'ldap'" (image may be built without LDAP).
+  - configmap.yaml
+  - deployment.yaml
   - service.yaml
   - certificate.yaml
   - ingressroute.yaml
