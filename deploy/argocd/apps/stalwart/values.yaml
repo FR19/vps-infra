@@ -98,7 +98,7 @@ stalwart-mail:
               if header :matches "Message-ID" "<*@*>" {
                 deleteheader "Message-ID";
                 addheader "Message-ID" "<${1}@tukangketik.net>";
-              } elsif not header :exists "Message-ID" {
+              } elsif not header :matches "Message-ID" "*" {
                 addheader "Message-ID" "<${env.now}.${env.remote_ip}@tukangketik.net>";
               }
     # SMTP banner / EHLO hostname (does not control Message-ID; that is fixed by the Sieve script above).
