@@ -24,8 +24,9 @@ spec:
             - sh
             - -c
             - |
-              mkdir -p /srv/etc
+              mkdir -p /srv/etc /etc/sogo
               cp /config/sogo.conf /srv/etc/sogo.conf
+              cp /config/sogo.conf /etc/sogo/sogo.conf
               mkdir -p /var/lock/apache2
           volumeMounts:
             - name: config
@@ -33,6 +34,8 @@ spec:
               readOnly: true
             - name: srv
               mountPath: /srv
+            - name: etc-sogo
+              mountPath: /etc/sogo
             - name: var-lock
               mountPath: /var/lock
       containers:
@@ -54,6 +57,9 @@ spec:
             # Apache needs writable /var/lock (e.g. mktemp .../var/lock/apache2.XXXXXXXXXX).
             - name: var-lock
               mountPath: /var/lock
+            # sogod reads /etc/sogo/sogo.conf; init copies our ConfigMap there.
+            - name: etc-sogo
+              mountPath: /etc/sogo
           resources:
             requests:
               memory: "256Mi"
@@ -81,6 +87,8 @@ spec:
         - name: srv
           emptyDir: {}
         - name: run
+          emptyDir: {}
+        - name: etc-sogo
           emptyDir: {}
         - name: var-lock
           emptyDir: {}
