@@ -1,3 +1,7 @@
+# SOGo (salvoxia/sogo) needs several writable paths; init creates dirs, emptyDir volumes provide writable mounts.
+# - /srv: config (etc), user data (lib/sogo/GNUstep). Init copies sogo.conf; container writes cron, apache-SOGo.conf.
+# - /run (→/var/run): service account, sogo.pid (/run/sogo), Apache PID/shm (/run/apache2), ldap-bind secret.
+# - /var/lock: Apache mktemp (apache2.XXXXXXXXXX). /etc/sogo: sogod reads sogo.conf. /tmp: temp files.
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -17,7 +21,7 @@ spec:
     spec:
       initContainers:
         # salvoxia/sogo expects writable /srv/etc and creates cron, apache-SOGo.conf at startup.
-        # Copy our ConfigMap into writable /srv/etc so main container finds sogo.conf and can create the rest.
+        # Copy our ConfigMap into writable /srv/etc; create all runtime dirs that SOGo/Apache may write to.
         - name: copy-config
           image: busybox:1.36
           command:
@@ -28,6 +32,8 @@ spec:
               cp /config/sogo.conf /srv/etc/sogo.conf
               cp /config/sogo.conf /etc/sogo/sogo.conf
               mkdir -p /var/lock/apache2
+              mkdir -p /run/sogo /run/apache2
+              mkdir -p /srv/lib/sogo/GNUstep
           volumeMounts:
             - name: config
               mountPath: /config
@@ -38,6 +44,8 @@ spec:
               mountPath: /etc/sogo
             - name: var-lock
               mountPath: /var/lock
+            - name: run
+              mountPath: /run
       containers:
         - name: sogo
           image: salvoxia/sogo:latest
@@ -60,6 +68,9 @@ spec:
             # sogod reads /etc/sogo/sogo.conf; init copies our ConfigMap there.
             - name: etc-sogo
               mountPath: /etc/sogo
+            # Writable /tmp for any temp files (SOGo, Apache, cron).
+            - name: tmp
+              mountPath: /tmp
           resources:
             requests:
               memory: "256Mi"
@@ -91,6 +102,8 @@ spec:
         - name: etc-sogo
           emptyDir: {}
         - name: var-lock
+          emptyDir: {}
+        - name: tmp
           emptyDir: {}
         - name: ldap-bind
           secret:
