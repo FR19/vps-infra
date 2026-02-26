@@ -33,6 +33,7 @@ spec:
               cp /config/sogo.conf /etc/sogo/sogo.conf
               mkdir -p /var/lock/apache2
               mkdir -p /run/sogo /run/apache2
+              chmod 1777 /run/sogo /run/apache2
               mkdir -p /srv/lib/sogo/GNUstep
           volumeMounts:
             - name: config

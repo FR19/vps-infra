@@ -1,0 +1,34 @@
+# Optional: use with sonroyaalmerol/docker-sogo. Mount this as /etc/sogo/sogo.conf.d/
+# so the image's config-generator produces /etc/sogo/sogo.conf (no manual plist { }).
+# Create secret: kubectl create secret generic sogo-ldap-bind -n sogo --from-literal=bindpw='<password>'
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: sogo-config-yaml
+  namespace: sogo
+  labels:
+    app.kubernetes.io/name: sogo
+data:
+  "99-config.yaml": |
+    SOGoProfileURL: "ldap://ak-outpost-ldap-outpost.auth.svc.cluster.local:389/dc=ldap,dc=goauthentik,dc=io?cn?sub?(objectClass=user)"
+    SOGoUserSources:
+      - type: ldap
+        id: directory
+        displayName: Authentik
+        hostname: ak-outpost-ldap-outpost.auth.svc.cluster.local
+        port: 389
+        baseDN: ou=users,dc=ldap,dc=goauthentik,dc=io
+        bindDN: cn=ldapservice,ou=users,dc=ldap,dc=goauthentik,dc=io
+        bindPasswordFile: /run/sogo-secrets/ldap-bind-password
+        filter: objectClass=user
+        CN: cn
+        UID: cn
+        mail: mail
+        searchField: cn
+    SOGoIMAPServer: stalwart-mail.mail.svc.cluster.local
+    SOGoSMTPServer: stalwart-mail.mail.svc.cluster.local
+    SOGoMailingMechanism: smtp
+    SOGoAuthenticationType: LDAP
+    SOGoPageTitle: Mail
+    SOGoUIAdditionalLanguages:
+      - en

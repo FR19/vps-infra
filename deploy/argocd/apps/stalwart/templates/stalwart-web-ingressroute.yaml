@@ -15,8 +15,8 @@ spec:
     - match: Host(`{{ .Values.hostname }}`)
       kind: Rule
       services:
-        - name: {{ .Release.Name }}-stalwart-mail
+        - name: {{ .Release.Name }}
           port: 80
   tls:
-    secretName: stalwart-tls
+    secretName: stalwart-mail-cert
 {{- end }}
