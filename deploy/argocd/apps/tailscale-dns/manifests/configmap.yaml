@@ -10,7 +10,7 @@ metadata:
 data:
   Corefile: |
     .:53 {
-        forward . 94.140.14.14 94.140.15.15 8.8.8.8 1.1.1.1 {
+        forward . tls://dns.adguard-dns.com tls://p2.freedns.controld.com {
             policy sequential
         }
         cache
@@ -20,7 +20,7 @@ data:
         hosts /etc/coredns/tukangketik.hosts tukangketik.net {
             fallthrough
         }
-        forward . 94.140.14.14 94.140.15.15 8.8.8.8 1.1.1.1 {
+        forward . tls://dns.adguard-dns.com tls://p2.freedns.controld.com {
             policy sequential
         }
         cache
