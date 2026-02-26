@@ -74,8 +74,12 @@ stalwart-mail:
         - "auth.dkim.sign.*"
         - "auth.dkim.verify"
         - "http.use-x-forwarded"
+        - "http.permissive-cors"
         - "report.domain"
         - "webadmin.resource"
+    # Allow browser from webmail.tukangketik.net to call JMAP at mail.tukangketik.net (CORS).
+    http:
+      permissive-cors: true
     # Direct webadmin zip URL (avoids GitHub /latest redirect which often fails from pods). Key is webadmin.resource per Stalwart docs.
     webadmin:
       resource: "https://github.com/stalwartlabs/webadmin/releases/download/v0.1.37/webadmin.zip"
