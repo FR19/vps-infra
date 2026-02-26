@@ -1,7 +1,10 @@
 # Wrapper chart: subchart values under stalwart-mail. We use Traefik IngressRoute (templates/) instead of standard Ingress.
 # Chart 0.4.9 / app v0.15.5 is current as of Feb 2026.
-# Create secret before sync: kubectl create secret generic stalwart-ldap-bind -n mail --from-literal=LDAP_BIND_PASSWORD='<service-account-password>'
+# Create secrets before sync:
+#   stalwart-ldap-bind:  kubectl create secret generic stalwart-ldap-bind -n mail --from-literal=LDAP_BIND_PASSWORD='<service-account-password>'
+#   stalwart-fallback-admin:  kubectl create secret generic stalwart-fallback-admin -n mail --from-literal=STALWART_FALLBACK_ADMIN_PASSWORD='<webadmin-password>'
 # See docs/authentik-ldap-mail-setup.md for Authentik LDAP provider + outpost.
+# Webadmin does NOT use OIDC/Authentik; log in with the fallback admin user below (or an admin created in webadmin).
 
 # Hostname for Stalwart webadmin (used by wrapper IngressRoute).
 hostname: mail.tukangketik.net
@@ -80,6 +83,11 @@ stalwart-mail:
     # Allow browser from webmail.tukangketik.net to call JMAP at mail.tukangketik.net (CORS).
     http:
       permissive-cors: true
+    # Fallback admin for webadmin UI (not OIDC/Authentik). Log in at https://mail.<domain> with this user and secret from stalwart-fallback-admin.
+    authentication:
+      fallback-admin:
+        user: "admin"
+        secret: "%{env:STALWART_FALLBACK_ADMIN_PASSWORD}%"
     # Direct webadmin zip URL (avoids GitHub /latest redirect which often fails from pods). Key is webadmin.resource per Stalwart docs.
     webadmin:
       resource: "https://github.com/stalwartlabs/webadmin/releases/download/v0.1.37/webadmin.zip"
@@ -115,10 +123,12 @@ stalwart-mail:
           email: "mail"
           secret-changed: "pwdChangedTime"
 
-  # LDAP bind password from secret (create stalwart-ldap-bind with key LDAP_BIND_PASSWORD)
+  # LDAP bind + fallback admin from secrets (create stalwart-ldap-bind, stalwart-fallback-admin in namespace mail).
   secrets:
     create: true
     env: {}
   envFrom:
     - secretRef:
         name: stalwart-ldap-bind
+    - secretRef:
+        name: stalwart-fallback-admin

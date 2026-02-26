@@ -14,6 +14,8 @@ spec:
   routes:
     - match: Host(`{{ .Values.hostname }}`)
       kind: Rule
+      middlewares:
+        - name: stalwart-web-compress
       services:
         - name: {{ .Release.Name }}
           port: 80
