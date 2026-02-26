@@ -1,8 +1,8 @@
-# K3s HelmChartConfig: enable Traefik CRD provider allowCrossNamespace.
+# K3s HelmChartConfig: enable Traefik CRD provider allowCrossNamespace + TCP entrypoints for Stalwart mail.
 # Required for Mailu+Authentik so the callback route (mailu -> auth/authentik-server) works.
+# TCP entrypoints smtp/submission/imaps (25, 587, 993) are used by Stalwart IngressRouteTCP; Traefik must be able to bind (e.g. hostNetwork).
 # Apply once: kubectl apply -f deploy/traefik/k3s-allow-cross-namespace.yaml
-# Then restart Traefik: kubectl rollout restart deployment -n kube-system -l app.kubernetes.io/name=traefik
-# See: https://doc.traefik.io/traefik/v2.4/providers/kubernetes-crd/#allowcrossnamespace
+# After changing this file: kubectl apply -f deploy/traefik/helmchartconfig.yaml && kubectl rollout restart deployment -n kube-system -l app.kubernetes.io/name=traefik
 ---
 apiVersion: helm.cattle.io/v1
 kind: HelmChartConfig
@@ -21,6 +21,8 @@ spec:
     providers:
       kubernetesCRD:
         allowCrossNamespace: true
+    # TCP entrypoints for Stalwart mail (25, 587, 993). Traefik must bind these (e.g. hostNetwork); then use IngressRouteTCP to forward to Stalwart.
     additionalArguments:
-      - "--entrypoints.web.http.redirections.entrypoint.to=websecure"
-      - "--entrypoints.web.http.redirections.entrypoint.scheme=https"
+      - "--entrypoints.smtp.address=:25"
+      - "--entrypoints.submission.address=:587"
+      - "--entrypoints.imaps.address=:993"

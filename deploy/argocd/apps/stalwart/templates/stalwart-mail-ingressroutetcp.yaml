@@ -1,0 +1,54 @@
+{{- if .Values.hostname }}
+# TCP routes for Stalwart mail (25 SMTP, 587 submission, 993 IMAPS). Requires Traefik entrypoints smtp, submission, imaps (see deploy/traefik/helmchartconfig.yaml).
+---
+apiVersion: traefik.io/v1alpha1
+kind: IngressRouteTCP
+metadata:
+  name: stalwart-smtp
+  namespace: {{ .Release.Namespace | quote }}
+  labels:
+    app.kubernetes.io/name: {{ .Chart.Name }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+spec:
+  entryPoints:
+    - smtp
+  routes:
+    - match: HostSNI(`*`)
+      services:
+        - name: {{ .Release.Name }}
+          port: 25
+---
+apiVersion: traefik.io/v1alpha1
+kind: IngressRouteTCP
+metadata:
+  name: stalwart-submission
+  namespace: {{ .Release.Namespace | quote }}
+  labels:
+    app.kubernetes.io/name: {{ .Chart.Name }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+spec:
+  entryPoints:
+    - submission
+  routes:
+    - match: HostSNI(`*`)
+      services:
+        - name: {{ .Release.Name }}
+          port: 587
+---
+apiVersion: traefik.io/v1alpha1
+kind: IngressRouteTCP
+metadata:
+  name: stalwart-imaps
+  namespace: {{ .Release.Namespace | quote }}
+  labels:
+    app.kubernetes.io/name: {{ .Chart.Name }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+spec:
+  entryPoints:
+    - imaps
+  routes:
+    - match: HostSNI(`*`)
+      services:
+        - name: {{ .Release.Name }}
+          port: 993
+{{- end }}
