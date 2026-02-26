@@ -26,3 +26,25 @@ spec:
       - "--entrypoints.smtp.address=:25/tcp"
       - "--entrypoints.submission.address=:587/tcp"
       - "--entrypoints.imaps.address=:993/tcp"
+
+    ports:
+      smtp:
+        port: 25
+        expose:
+          default: true
+        exposedPort: 25
+        protocol: TCP
+
+      submission:
+        port: 587
+        expose:
+          default: true
+        exposedPort: 587
+        protocol: TCP
+
+      imaps:
+        port: 993
+        expose:
+          default: true
+        exposedPort: 993
+        protocol: TCP
