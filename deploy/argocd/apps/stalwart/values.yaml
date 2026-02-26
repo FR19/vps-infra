@@ -82,20 +82,28 @@ stalwart-mail:
         - "report.domain"
         - "webadmin.resource"
         - "sieve.trusted.*"
-        # - "session.data.*"
-    # Run Sieve at DATA stage to rewrite Message-ID hostname (so it uses our domain instead of pod name).
-    # session:
-    #   data:
-    #     script: "rewrite-mid-hostname"
-    # Trusted Sieve script: rewrite Message-ID to use mail hostname (see https://stalw.art/docs/sieve/interpreter/trusted/ and editheader).
-    # Runs for all submitted messages; replace hostname below if your mail host is different.
+        - "session.data.*"
+    # DATA-stage Sieve script to rewrite Message-ID hostname (server.hostname only affects SMTP banner, not Message-ID).
+    # Script name must be an expression literal: single quotes in value so TOML has script = "'rewrite-mid-hostname'".
+    session:
+      data:
+        script: "'rewrite-mid-hostname'"
     sieve:
       trusted:
         hostname: "tukangketik.net"
-
-    # SMTP banner, EHLO, and general Message-ID hostname. Set via env so it is not overridden by pod hostname.
+        scripts:
+          rewrite-mid-hostname:
+            contents: |
+              require ["editheader", "variables"];
+              if header :matches "Message-ID" "<*@*>" {
+                deleteheader "Message-ID";
+                addheader "Message-ID" "<${1}@tukangketik.net>";
+              } elsif not header :exists "Message-ID" {
+                addheader "Message-ID" "<${env.now}.${env.remote_ip}@tukangketik.net>";
+              }
+    # SMTP banner / EHLO hostname (does not control Message-ID; that is fixed by the Sieve script above).
     server:
-      hostname: "mail.tukangketik.net"
+      hostname: "%{env:STALWART_PUBLIC_HOSTNAME}%"
     # Allow browser from webmail.tukangketik.net to call JMAP at mail.tukangketik.net (CORS).
     http:
       permissive-cors: true
