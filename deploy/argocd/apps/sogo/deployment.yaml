@@ -26,12 +26,15 @@ spec:
             - |
               mkdir -p /srv/etc
               cp /config/sogo.conf /srv/etc/sogo.conf
+              mkdir -p /var/lock/apache2
           volumeMounts:
             - name: config
               mountPath: /config
               readOnly: true
             - name: srv
               mountPath: /srv
+            - name: var-lock
+              mountPath: /var/lock
       containers:
         - name: sogo
           image: salvoxia/sogo:latest
@@ -48,6 +51,9 @@ spec:
             - name: ldap-bind
               mountPath: /run/sogo-secrets
               readOnly: true
+            # Apache needs writable /var/lock (e.g. mktemp .../var/lock/apache2.XXXXXXXXXX).
+            - name: var-lock
+              mountPath: /var/lock
           resources:
             requests:
               memory: "256Mi"
@@ -75,6 +81,8 @@ spec:
         - name: srv
           emptyDir: {}
         - name: run
+          emptyDir: {}
+        - name: var-lock
           emptyDir: {}
         - name: ldap-bind
           secret:
