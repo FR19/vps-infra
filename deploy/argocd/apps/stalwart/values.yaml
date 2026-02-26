@@ -86,14 +86,14 @@ stalwart-mail:
     # Run Sieve at DATA stage to rewrite Message-ID hostname (so it uses our domain instead of pod name).
     session:
       data:
-        script: "message-id-rewrite"
+        script: "rewrite-mid-hostname"
     # Trusted Sieve script: rewrite Message-ID to use mail hostname (see https://stalw.art/docs/sieve/interpreter/trusted/ and editheader).
     # Runs for all submitted messages; replace hostname below if your mail host is different.
     sieve:
       trusted:
         hostname: "tukangketik.net"
         scripts:
-          message-id-rewrite:
+          rewrite-mid-hostname:
             contents: |
               require ["editheader", "variables"];
               # Rewrite Message-ID so the right-hand side is our mail hostname (not the pod name).
