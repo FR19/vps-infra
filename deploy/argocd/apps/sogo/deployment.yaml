@@ -25,7 +25,10 @@ spec:
             - name: config
               mountPath: /srv/etc
               readOnly: true
-            # Use a path that does not conflict with Kubernetes service account mount (/var/run/secrets/kubernetes.io/...).
+            # Writable /run so runtime can create service account mount at /var/run/secrets/... (image often has /var/run -> /run).
+            - name: run
+              mountPath: /run
+            # LDAP bind secret (under /run so it lives in the writable emptyDir).
             - name: ldap-bind
               mountPath: /run/sogo-secrets
               readOnly: true
@@ -52,6 +55,8 @@ spec:
         - name: config
           configMap:
             name: sogo-config
+        - name: run
+          emptyDir: {}
         - name: ldap-bind
           secret:
             secretName: sogo-ldap-bind
