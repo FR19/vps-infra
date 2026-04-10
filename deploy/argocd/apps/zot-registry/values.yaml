@@ -20,5 +20,5 @@ pvc:
 configFiles: {}
 
 externalSecrets:
-  - name: zot-registry-config
+  - secretName: zot-registry-config
     mountPath: /etc/zot
