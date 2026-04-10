@@ -1,0 +1,40 @@
+# Zot OCI-native container registry with Authentik OIDC authentication.
+# Prerequisites:
+#   1. In Authentik: create an OAuth2/OIDC Provider + Application (slug: zot-registry).
+#      Redirect URI: https://registry.tukangketik.net/zot/auth/callback/oidc
+#      Scopes: openid, profile, email, groups
+#   2. Create the config secret (contains OIDC credentials — not in git):
+#      kubectl create secret generic zot-registry-config \
+#        -n zot-registry --from-file=config.json=./zot-config.json
+#      See docs/zot-registry.md for the full config.json template.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: zot-registry
+  namespace: argocd
+spec:
+  project: vps-platform
+  sources:
+    - repoURL: https://zotregistry.dev/helm-charts
+      chart: zot
+      targetRevision: "0.1.104"
+      helm:
+        releaseName: zot-registry
+        valueFiles:
+          - $values/deploy/argocd/apps/zot-registry/values.yaml
+    - repoURL: git@github.com:FR19/vps-infra.git
+      targetRevision: main
+      ref: values
+    - repoURL: git@github.com:FR19/vps-infra.git
+      targetRevision: main
+      path: deploy/argocd/apps/zot-registry/manifests
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: zot-registry
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true

@@ -17,3 +17,4 @@ resources:
   # Webmail (use one; both use webmail.<domain>). Prefer jmap-webmail to avoid SOGo LDAP issues.
   # - sogo/sogo.application.yaml
   - jmap-webmail/jmap-webmail.application.yaml
+  - zot-registry/zot-registry.application.yaml

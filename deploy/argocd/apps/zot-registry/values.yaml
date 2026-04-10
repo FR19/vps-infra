@@ -1,0 +1,24 @@
+replicaCount: 1
+
+image:
+  tag: "v2.1.15"
+
+service:
+  type: ClusterIP
+  port: 5000
+
+persistence: true
+
+pvc:
+  create: true
+  storage: 20Gi
+  # storageClassName: ""  # leave empty to use cluster default
+
+# Config is provided entirely via the zot-registry-config Kubernetes secret (not in git).
+# That secret's config.json contains OIDC client credentials and the full Zot configuration.
+# Bootstrap command: see docs/zot-registry.md
+configFiles: {}
+
+externalSecrets:
+  - name: zot-registry-config
+    mountPath: /etc/zot

@@ -1,0 +1,18 @@
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: zot-registry
+  namespace: zot-registry
+  labels:
+    app.kubernetes.io/name: zot-registry
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`registry.tukangketik.net`)
+      kind: Rule
+      services:
+        - name: zot-registry
+          port: 5000
+  tls:
+    secretName: zot-registry-tls
