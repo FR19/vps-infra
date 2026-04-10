@@ -16,6 +16,7 @@ spec:
     - https://github.com/jetstack/cert-manager
     - https://github.com/goauthentik/authentik
     - https://aureq.github.io/cert-manager-webhook-ovh/
+    - https://zotregistry.dev/helm-charts
   destinations:
     - namespace: "*"
       server: https://kubernetes.default.svc
